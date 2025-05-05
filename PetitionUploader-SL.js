@@ -1,0 +1,108 @@
+/**
+ * @NApiVersion 2.1
+ * @NScriptType Suitelet
+ */
+define(['N/task', 'N/email', 'N/file', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/runtime', 'N/query', 'SuiteScripts/Libraries/RM-functions.js'],
+  function(task, email, file, record, search, sw, runtime, query, rmfunc) {
+
+  function timestamp() {
+    var datetimenow = new Date();
+    var MM = ('' + datetimenow.getMonth() + 1).padStart(2, '0');
+    var dd = ('' + datetimenow.getDate()).padStart(2, '0');
+    var yyyy = ('' + datetimenow.getFullYear()).padStart(2, '0');
+    var hh = ('' + datetimenow.getHours()).padStart(2, '0');
+    var mm = ('' + datetimenow.getMinutes()).padStart(2, '0');
+    var ss = ('' + datetimenow.getSeconds()).padStart(2, '0');
+    var today = yyyy + MM + dd + hh + mm + ss;
+    return today;
+  }
+
+  function drawform() {
+    var form = sw.createForm({
+      title: 'Upload File'
+    });
+    var fld = form.addField({
+      id: 'custpage_file',
+      type: 'file',
+      label: 'Upload File Here'
+    });
+    var fld = form.addField({
+      id: 'custpage_directions',
+      type: 'text',
+      label: 'Required Format'
+    });
+    fld.updateDisplayType({
+      displayType: 'inline'
+    });
+    form.addSubmitButton({
+      label: 'Submit'
+    });
+    fld.defaultValue = `Filename format:<br />
+Two letter state abbreviation_County Name With Spaces, Proper Case_Case #<br />
+Ex: Santa Rosa County Florida, case# ABV12896DX:<br />
+FL_Santa Rosa_ABV12896DX.pdf`;
+    return form;
+  }
+
+  function doPost(context) {
+    var userid = runtime.getCurrentUser().id;
+                context.response.writeLine(JSON.stringify(context.request));
+    return;
+    
+    var data = {};
+    var invoicedata={};
+    var errors = {};
+    var invintids = [];
+    var resultcount = 0;
+    var f = context.request.files['custpage_file'];
+    if (f.fileType == 'CSV' && f.isText) {
+      var filecontents = f.getContents();
+      var lines = filecontents.trim().replace(/\r/g, '').split(/\n/);
+      var headers = lines[0];
+      var temp = lines[0].split(',');
+      if (temp.length != 4 || temp[0] != 'GroupName' || temp[1] != 'PurchaseDate' || temp[2] != 'Multiple' || temp[3] != 'AssetID') {
+        context.response.writeLine('Incorrect CSV format. Please see requirements and check the file you are uploading.');
+        return;
+      }
+      f.folder=24169;
+      f.name=Date.now()+'-asset-tagging.csv';
+      var csvfileid=f.save();
+      context.response.writeLine('saved file '+f.name+' to file cabinet with internal id '+csvfileid+'.');
+    } else {
+      context.response.writeLine('Incorrect file type. Please select a CSV file with the headers: GroupName, PurchaseDate, Multiple, AssetID');
+      return;
+    }
+    try {
+      var mrTask = task.create({
+        taskType: task.TaskType.MAP_REDUCE,
+        scriptId: 'customscript_invsec_csvupload_mr',
+        deploymentId: 'customdeploy1',
+        params: { custscriptfileid: csvfileid }
+      });
+      var mrTaskId = mrTask.submit();
+      context.response.writeLine('scheduled MR job '+mrTaskId);
+    } catch(e) {
+      context.response.writeLine('failed to schedule job: '+e.name+' '+e.message);
+    }
+
+    return true;
+  }
+
+  function doGet(context) {
+    context.response.writePage(drawform());
+    return true;
+  }
+
+  function onRequest(context) {
+    if (context.request.method == 'GET') {
+      doGet(context);
+    } else {
+      doPost(context);
+    }
+  }
+
+  return {
+    onRequest
+  }
+
+});
