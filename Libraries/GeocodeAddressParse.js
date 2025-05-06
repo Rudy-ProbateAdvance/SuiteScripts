@@ -1,7 +1,7 @@
 /**
  *@NApiVersion 2.1
  */
-define(['N/https'], function(https){
+define(['N/https', 'N/file'], function(https, file){
 
   function parseAddress(address) {
     if(!address || address.trim().toUpperCase().slice(0,2)=='RP') {
@@ -16,6 +16,7 @@ define(['N/https'], function(https){
 //    log.debug('geocodeget() entry');
     var request={};
     var retval={success:false};
+//    var f=file.load
 //    var apikey="AIzaSyBlAKixNRLrv4OpguDveUoogkubWHw-i50"; // my personal API key
     var apikey="AIzaSyAjAjI1ii7gWPPzAxs33v7uYmfR8gtW2bk"; // PA API key
     var addr=address;
