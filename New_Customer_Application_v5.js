@@ -247,6 +247,8 @@ function New_Customer_Application(request, response) {
         var latestStatus = null;
         var latestStatusId = null;
         var latestStatusNotes = null;
+        var casefilenum = null;
+        var fldval = null;
 
         if (customerId != null) {
           var filters = [];
@@ -298,8 +300,11 @@ function New_Customer_Application(request, response) {
         if (estate != null)
           fld.setDefaultValue(estate.getFieldValue("companyname"));
         fld = form.addField("custpage_case_no", "text", "Case File No", null, "estate");
-        if (estate != null)
-          fld.setDefaultValue(estate.getFieldValue("custentity1"));
+        if (estate != null) {
+          casefilenum=estate.getFieldValue("custentity1");
+          fld.setDefaultValue(casefilenum);
+        }
+        casefilelinkfld = form.addField("custpage_casefilelink", "inlinehtml", "Case File Link", null, "estate");
 
 
         try {
@@ -372,9 +377,55 @@ function New_Customer_Application(request, response) {
         fld = form.addField("custpage_estate_county_warn", "inlinehtml", "County Warning", null, "estate");
         fld.setDefaultValue(" ");
         fld = form.addField("custpage_estate_county", "select", "County", "customrecord173", "estate");
-        if (estate != null)
-          fld.setDefaultValue(estate.getFieldValue("custentity2"));
+        var countyval=estate.getFieldValue("custentity2")
+        if (estate != null) {
+          fld.setDefaultValue(countyval);
+        }
 
+        if(casefilenum!=null) {
+          var countyname=nlapiLookupField('customrecord173',countyval, 'name');
+          nlapiLogExecution("DEBUG", "countyname:"+countyname);
+          var stcty=countyname.split("_");
+          var filenamecomponents=[];
+          filenamecomponents.push(stateToAbbrev(stcty[0]));
+          filenamecomponents.push(stcty[1]);
+          filenamecomponents.push(casefilenum);
+          var casefilename=filenamecomponents.join("_");
+          var rs = nlapiSearchRecord("file",null,
+            [
+//               ["name","contains",casefilename]
+               ["formulatext: regexp_replace({name},'\\..*$','')","is",casefilename]
+            ], 
+            [
+               new nlobjSearchColumn("name"), 
+               new nlobjSearchColumn("folder"), 
+               new nlobjSearchColumn("documentsize"), 
+               new nlobjSearchColumn("url"), 
+               new nlobjSearchColumn("created"), 
+               new nlobjSearchColumn("modified"), 
+               new nlobjSearchColumn("filetype")
+            ]
+            );
+          if(rs==null)
+            rs=[];
+          switch(rs.length) {
+            case 0:
+              fldval='No file uploaded yet';
+              break;
+            case 1:
+              var filename=rs[0].getValue("name");
+              var fileurl=rs[0].getValue("url");
+              var linktext='<a target="_blank" href="'+fileurl+'">'+filename+'</a>';
+              fldval=linktext;
+              break;
+            default:
+              fldval="More than one match - need further investigation";
+          }
+          casefilelinkfld.setDefaultValue(fldval);
+        }
+
+
+        
         fld = form.addField("custpage_estate_est_date_distr", "date", "Estimated Date of Distribution", null, "estate");
         if (estate != null)
           fld.setDefaultValue(estate.getFieldValue("custentity_est_date_of_distribution"));
@@ -2462,3 +2513,111 @@ function getLeadSources() {
   return leadsources;
 }
 
+function stateToAbbrev(statename) {
+  return {
+    'alabama':'AL',
+    'al':'Alabama',
+    'alaska':'AK',
+    'ak':'Alaska',
+    'arizona':'AZ',
+    'az':'Arizona',
+    'arkansas':'AR',
+    'ar':'Arkansas',
+    'california':'CA',
+    'ca':'California',
+    'colorado':'CO',
+    'co':'Colorado',
+    'connecticut':'CT',
+    'ct':'Connecticut',
+    'delaware':'DE',
+    'de':'Delaware',
+    'district of columbia':'DC',
+    'dc':'District Of Columbia',
+    'florida':'FL',
+    'fl':'Florida',
+    'georgia':'GA',
+    'ga':'Georgia',
+    'hawaii':'HI',
+    'hi':'Hawaii',
+    'idaho':'ID',
+    'id':'Idaho',
+    'illinois':'IL',
+    'il':'Illinois',
+    'indiana':'IN',
+    'in':'Indiana',
+    'iowa':'IA',
+    'ia':'Iowa',
+    'kansas':'KS',
+    'ks':'Kansas',
+    'kentucky':'KY',
+    'ky':'Kentucky',
+    'louisiana':'LA',
+    'la':'Louisiana',
+    'maine':'ME',
+    'me':'Maine',
+    'maryland':'MD',
+    'md':'Maryland',
+    'massachusetts':'MA',
+    'ma':'Massachusetts',
+    'missouri':'MI',
+    'mi':'Missouri',
+    'minnesota':'MN',
+    'mn':'Minnesota',
+    'mississippi':'MS',
+    'ms':'Mississippi',
+    'missouri':'MO',
+    'mo':'Missouri',
+    'montana':'MT',
+    'mt':'Montana',
+    'nebraska':'NE',
+    'ne':'Nebraska',
+    'nevada':'NV',
+    'nv':'Nevada',
+    'new hampshire':'NH',
+    'nh':'New Hampshire',
+    'new jersey':'NJ',
+    'nj':'New Jersey',
+    'new mexico':'NM',
+    'nm':'New Mexico',
+    'new york':'NY',
+    'ny':'New York',
+    'north carolina':'NC',
+    'nc':'North Carolina',
+    'north dakota':'ND',
+    'nd':'North Dakota',
+    'ohio':'OH',
+    'oh':'Ohio',
+    'oklahoma':'OK',
+    'ok':'Oklahoma',
+    'oregon':'OR',
+    'or':'Oregon',
+    'pennsylvania':'PA',
+    'pa':'Pennsylvania',
+    'puerto rico':'PR',
+    'pr':'Puerto Rico',
+    'rhode island':'RI',
+    'ri':'Rhode Island',
+    'south carolina':'SC',
+    'sc':'South Carolina',
+    'south dakota':'SD',
+    'sd':'South Dakota',
+    'tennessee':'TN',
+    'tn':'Tennessee',
+    'texas':'TX',
+    'tx':'Texas',
+    'utah':'UT',
+    'ut':'Utah',
+    'vermont':'VT',
+    'vt':'Vermont',
+    'virginia':'VA',
+    'va':'Virginia',
+    'washington':'WA',
+    'wa':'Washington',
+    'west virginia':'WV',
+    'wv':'West Virginia',
+    'wisconsin':'WI',
+    'wi':'Wisconsin',
+    'wyoming':'WY',
+    'wy':'Wyoming',
+  }[statename.toLowerCase()];
+}

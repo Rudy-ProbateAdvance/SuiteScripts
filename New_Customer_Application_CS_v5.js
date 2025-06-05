@@ -1,4 +1,8 @@
 // noinspection JSVoidFunctionReturnValueUsed
+//jQuery(document).ready(alert("document.ready"));
+//document.addEventListener("DOMContentLoaded", function(event){
+//  alert("domcontentloaded");
+//});
 
 function clearchanged() {
 //  window.ischanged=false;
@@ -471,6 +475,12 @@ function New_Cust_App_CS_FC(type, name, linenum) {
             nlapiSetFieldValue("custpage_estate", estateId, false, true);
             break;
         }
+      }
+
+      if(name == "custpage_case_no") {
+        casenum=nlapiGetFieldValue("custpage_case_no");
+        county=nlapiGetFieldValue("custpage_estate_county");
+        nlapiSetFieldValue("custpage_casefilelink", getcasefilelink(casenum, county));
       }
 
       if (name == "custpage_estate_state")
@@ -3636,3 +3646,154 @@ function mapclasstostate(a) {
   var states={"4":"0", "5":"1", "6":"2", "7":"3", "1":"4", "8":"5", "9":"6", "10":"7", "104":"8", "3":"9", "11":"10", "12":"11", "13":"12", "14":"13", "15":"14", "16":"15", "17":"16", "18":"17", "19":"18", "20":"19", "21":"20", "22":"21", "23":"22", "24":"23", "25":"24", "26":"25", "27":"26", "28":"27", "29":"28", "30":"29", "31":"30", "32":"31", "2":"32", "33":"33", "34":"34", "35":"35", "36":"36", "37":"37", "38":"38", "39":"40", "40":"41", "41":"42", "42":"43", "43":"44", "44":"45", "45":"46", "46":"47", "47":"48", "48":"49", "49":"50", "50":"51"};
   return states[a];
 }
+
+function stateToAbbrev(statename) {
+  return {
+    'alabama':'AL',
+    'al':'Alabama',
+    'alaska':'AK',
+    'ak':'Alaska',
+    'arizona':'AZ',
+    'az':'Arizona',
+    'arkansas':'AR',
+    'ar':'Arkansas',
+    'california':'CA',
+    'ca':'California',
+    'colorado':'CO',
+    'co':'Colorado',
+    'connecticut':'CT',
+    'ct':'Connecticut',
+    'delaware':'DE',
+    'de':'Delaware',
+    'district of columbia':'DC',
+    'dc':'District Of Columbia',
+    'florida':'FL',
+    'fl':'Florida',
+    'georgia':'GA',
+    'ga':'Georgia',
+    'hawaii':'HI',
+    'hi':'Hawaii',
+    'idaho':'ID',
+    'id':'Idaho',
+    'illinois':'IL',
+    'il':'Illinois',
+    'indiana':'IN',
+    'in':'Indiana',
+    'iowa':'IA',
+    'ia':'Iowa',
+    'kansas':'KS',
+    'ks':'Kansas',
+    'kentucky':'KY',
+    'ky':'Kentucky',
+    'louisiana':'LA',
+    'la':'Louisiana',
+    'maine':'ME',
+    'me':'Maine',
+    'maryland':'MD',
+    'md':'Maryland',
+    'massachusetts':'MA',
+    'ma':'Massachusetts',
+    'missouri':'MI',
+    'mi':'Missouri',
+    'minnesota':'MN',
+    'mn':'Minnesota',
+    'mississippi':'MS',
+    'ms':'Mississippi',
+    'missouri':'MO',
+    'mo':'Missouri',
+    'montana':'MT',
+    'mt':'Montana',
+    'nebraska':'NE',
+    'ne':'Nebraska',
+    'nevada':'NV',
+    'nv':'Nevada',
+    'new hampshire':'NH',
+    'nh':'New Hampshire',
+    'new jersey':'NJ',
+    'nj':'New Jersey',
+    'new mexico':'NM',
+    'nm':'New Mexico',
+    'new york':'NY',
+    'ny':'New York',
+    'north carolina':'NC',
+    'nc':'North Carolina',
+    'north dakota':'ND',
+    'nd':'North Dakota',
+    'ohio':'OH',
+    'oh':'Ohio',
+    'oklahoma':'OK',
+    'ok':'Oklahoma',
+    'oregon':'OR',
+    'or':'Oregon',
+    'pennsylvania':'PA',
+    'pa':'Pennsylvania',
+    'puerto rico':'PR',
+    'pr':'Puerto Rico',
+    'rhode island':'RI',
+    'ri':'Rhode Island',
+    'south carolina':'SC',
+    'sc':'South Carolina',
+    'south dakota':'SD',
+    'sd':'South Dakota',
+    'tennessee':'TN',
+    'tn':'Tennessee',
+    'texas':'TX',
+    'tx':'Texas',
+    'utah':'UT',
+    'ut':'Utah',
+    'vermont':'VT',
+    'vt':'Vermont',
+    'virginia':'VA',
+    'va':'Virginia',
+    'washington':'WA',
+    'wa':'Washington',
+    'west virginia':'WV',
+    'wv':'West Virginia',
+    'wisconsin':'WI',
+    'wi':'Wisconsin',
+    'wyoming':'WY',
+    'wy':'Wyoming',
+  }[statename.toLowerCase()];
+}
+
+function getcasefilelink(casenum, countyval) {
+  var retval=null;
+  var countyname=nlapiLookupField('customrecord173',countyval, 'name');
+  var stcty=countyname.split("_");
+  var filenamecomponents=[];
+  filenamecomponents.push(stateToAbbrev(stcty[0]));
+  filenamecomponents.push(stcty[1]);
+  filenamecomponents.push(casenum);
+  var casefilename=filenamecomponents.join("_");
+  var rs = nlapiSearchRecord("file",null,
+    [
+       ["formulatext: regexp_replace({name},'\\..*$','')","is",casefilename]
+    ], 
+    [
+       new nlobjSearchColumn("name"), 
+       new nlobjSearchColumn("folder"), 
+       new nlobjSearchColumn("documentsize"), 
+       new nlobjSearchColumn("url"), 
+       new nlobjSearchColumn("created"), 
+       new nlobjSearchColumn("modified"), 
+       new nlobjSearchColumn("filetype")
+    ]
+    );
+  if(rs==null)
+    rs=[];
+  switch(rs.length) {
+    case 0:
+      retval='No file uploaded yet';
+      break;
+    case 1:
+      var filename=rs[0].getValue("name");
+      var fileurl=rs[0].getValue("url");
+      var linktext='<a target="_blank" href="'+fileurl+'">'+filename+'</a>';
+      retval=linktext;
+      break;
+    default:
+      retval="More than one match - need further investigation";
+  }
+  return retval;
+}
+
