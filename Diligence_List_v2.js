@@ -23,10 +23,12 @@ function Diligence_List(request,response)
 
 		fld = list.addField("custpage_est_date_of_distr","date","Est Date of Distr");
 		fld.setDisplaySize(50);
-		fld = list.addField("custpage_invoice_list_text","textarea","List of Invoices");
+        fld = list.addField("custpage_invoice_list_text","textarea","List of Invoices");
 		fld.setDisplaySize(75);
 		fld.setDisplayType("hidden");
-		fld = list.addField("custpage_invoice_list","textarea","List of Invoices...............................................................");
+        fld = list.addField("custpage_invoice_list","textarea","List of Invoices...............................................................");
+		fld.setDisplaySize(75);
+        fld = list.addField("custpage_invoice_list_of","textarea","List of Invoices (overflow).....................................................");
 		fld.setDisplaySize(75);
 
 		//fld = list.addField("custpage_stamped_assignment", "text", "Stamped assignment");
@@ -231,13 +233,18 @@ function Diligence_List(request,response)
 		for(var x=0; x < data.length; x++)
 		{
 			var invoice_link = "";
+            var invoice_link_overflow = "";
 			var invoice_link_text=[];
 			var invoice_total = 0.00;
 			var invoice_estate = "";
 			var invoice_ids=[];
 			for(var i=0; i < data[x].invoices.length; i++)
 			{
-				invoice_link += "<a href='/app/accounting/transactions/custinvc.nl?id=" + data[x].invoices[i].internalid + "' target='_blank'>" + data[x].invoices[i].customerName + " - " + data[x].invoices[i].tranid + " (" + data[x].invoices[i].amount + ") </a><br/>"
+                if(invoice_link.length<3500) {
+                  invoice_link += "<a href='/app/accounting/transactions/custinvc.nl?id=" + data[x].invoices[i].internalid + "' target='_blank'>" + data[x].invoices[i].customerName + " - " + data[x].invoices[i].tranid + " (" + data[x].invoices[i].amount + ") </a><br/>"
+                } else {
+                  invoice_link_overflow += "<a href='/app/accounting/transactions/custinvc.nl?id=" + data[x].invoices[i].internalid + "' target='_blank'>" + data[x].invoices[i].customerName + " - " + data[x].invoices[i].tranid + " (" + data[x].invoices[i].amount + ") </a><br/>"
+                }
 				invoice_link_text.push(data[x].invoices[i].customerName + " - " + data[x].invoices[i].tranid + " (" + data[x].invoices[i].amount +")");
 				invoice_total += parseFloat(data[x].invoices[i].amount);
 				invoice_ids.push(data[x].invoices[i].internalid)
@@ -247,6 +254,7 @@ function Diligence_List(request,response)
 			}
 			data[x].invoice_id = invoice_ids.toString();
 			data[x].invoice_link = invoice_link;
+            data[x].invoice_link_overflow = invoice_link_overflow;
 			data[x].invoice_link_text=invoice_link_text.toString();
 			data[x].invoice_total = nlapiFormatCurrency(invoice_total);
 			//  data[x].estate_status_part = invoice_estate;
@@ -375,13 +383,22 @@ function Diligence_List(request,response)
 		for(var x=0; x < data.length; x++)
 		{
 			var pdfURL=createPDFURL+'&invoices='+ data[x].invoice_id ;
+            var invLink = data[x].invoice_link ;
+            var invLinkOverflow = data[x].invoice_link_overflow
+            
+            if (invLength = invLink.length >= 4000)
+            { 
+              invLink = invLink.substr(1,3600) + "TOO LONG:" + data[x].invoice_id;
+            }
 
 			sublistData.push({
 				custpage_decedent_name_text:data[x].decedent_name,
 				custpage_decedent_name : "<a href='/app/site/hosting/scriptlet.nl?script=180&deploy=1&compid=5295340&estate=" + data[x].estateId + "&native=T' target='_blank'>" + data[x].decedent_name + "</a>",
 				custpage_county : data[x].county,
 				custpage_invoice_list_text:data[x].invoice_link_text,
-				custpage_invoice_list : data[x].invoice_link,
+				//custpage_invoice_list : data[x].invoice_link,
+                custpage_invoice_list : invLink,
+                custpage_invoice_list_of : invLinkOverflow,
 				custpage_total_assignment : data[x].invoice_total,
 				custpage_last_phone_date : data[x].last_phone_call_date,
 				custpage_last_phone_subject : data[x].last_phone_call_subject,

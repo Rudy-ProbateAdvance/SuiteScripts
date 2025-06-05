@@ -36,16 +36,17 @@ var columnmaps = {
         },
         estates: {
             "estintid": {name: 'Internal ID', type: 'text', displayType: 'hidden'},
-            "pclpriority": {name: 'PCL Priority', type: 'text', displayType: 'entry'},
+            "pclpriority": {name: 'PCL Priority', type: 'integer', displayType: 'entry'},
             "estid": {name: 'Estate ID', type: 'text', displayType: 'inline'},
             "problemcase": {name: 'Problem Case', type: 'checkbox', displayType: 'entry'},
             "estname": {name: 'Name', type: 'text', displayType: 'inline'},
-            "receivables": {name: 'Receivables', type: 'text', displayType: 'inline'},
-            "totaldefault": {name: 'Total Expected Default', type: 'text', displayType: 'inline'},
+            "receivables": {name: 'Receivables', type: 'integer', displayType: 'inline'},
+            "defaultonexpected": {name: 'Default On Expected', type: 'integer', displayType: 'inline'},
+            "defaultonadvance": {name: 'Default On Advance', type: 'integer', displayType: 'inline'},
             "flagnotemsg": {name: 'Flagged Note Message', type: 'textarea', displayType: 'inline'},
-            "flagnotedate": {name: 'Flagged Note Date', type: 'text', displayType: 'inline'},
+            "flagnotedate": {name: 'Flagged Note Date', type: 'date', displayType: 'inline'},
             "lastnotemsg": {name: 'Latest Note Message', type: 'textarea', displayType: 'inline'},
-            "lastnotedate": {name: 'Latest Note Date', type: 'text', displayType: 'inline'},
+            "lastnotedate": {name: 'Latest Note Date', type: 'date', displayType: 'inline'},
         }
     };
 
@@ -226,6 +227,7 @@ define(['N/record', 'N/query', 'N/url', 'N/currentRecord', 'SuiteScripts/Librari
     }
 
     function stringifysublist(sublistid) {
+//      debugger;
         var rec = cr.get()
         var columnmap = columnmaps[sublistid];
         var headers = [];
@@ -238,15 +240,17 @@ define(['N/record', 'N/query', 'N/url', 'N/currentRecord', 'SuiteScripts/Librari
         var lc = rec.getLineCount({sublistId: sublistid});
         var cc = columns.length;
         var xmlstring = '"' + headers.join('","') + '"\n';
-      debugger;
+//      debugger;
         for (var i = 0; i < lc; i++) {
             var row = [];
             for (var j = 0; j < cc; j++) {
-              row.push(rec.getSublistText({
+              var cdata1=rec.getSublistText({
                   sublistId: sublistid,
                   fieldId: columns[j],
                   line: i
-              }).toString().trim().replace(/,/, ' ').replace(/"/g, "'"));
+              });
+              var cdata2=cdata1.toString().trim().replace(/,/, ' ').replace(/"/g, "'");
+              row.push(cdata2);
             }
             row = row.map(function (field) {
                 if (field.match(/href/))

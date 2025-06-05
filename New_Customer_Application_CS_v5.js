@@ -3595,6 +3595,8 @@ function getUpdateFields() {
     "custpage_sales_rep":{"target":"custentity_sales_rep","type":"customer","label":"Sales Rep","inactivecheck":true},
     "custpage_followup_type":{"target":"custentity_follow_up_type","type":"customer","label":"Followup Type"},
     "custpage_diligence_blocked_account_letter":{"target":"custentity_blocked_account_letter","type":"estate","label":"Blocked Account Letter"},
+    "custpage_client_signed_blocked_account":{"target":"custentity_client_signed_blocked_account","type":"estate","label":"Client Signed BOL Consent"},
+    "custpage_courtapproved_blocked_account":{"target":"custentity_courtapproved_blocked_account","type":"estate","label":"Court Approval Of Blocked Account"},
     "custpage_total_property":{"target":"custentity_estate_total_property","type":"estate","label":"Total Value of Real Property"},
     "custpage_total_claims":{"target":"custentity_estate_total_claims","type":"estate","label":"Total Claims"},
     "custpage_total_assets":{"target":"custentity_estate_total_assets","type":"estate","label":"Total Assets"},

@@ -597,18 +597,37 @@ function New_Customer_Application(request, response) {
         dotField.setDisplayType("disabled");             ////// Change
         var escrowField = form.addField("custpage_diligence_escrow", "checkbox", "ESCROW", null, "estate");
         escrowField.setDisplayType("disabled");            ////// Change
+
         var accountField = form.addField("custpage_diligence_blocked_account_letter", "checkbox", "Blocked Account Letter", null, "estate");
-        if (customer)
+        if /*(customer)
           accountField.setDefaultValue(customer.getFieldValue("custentity_blocked_account_letter"));
-        else if (estateId) {
+        else if*/ (estateId) {
           var estRecord = nlapiLoadRecord('customer', estateId);
           accountField.setDefaultValue(estRecord.getFieldValue("custentity_blocked_account_letter"));
         }
+
+        var accountField = form.addField("custpage_client_signed_blocked_account", "checkbox", "Client Signed Blocked Account Consent", null, "estate");
+        if /*(customer)
+          accountField.setDefaultValue(customer.getFieldValue("custentity_courtapproved_blocked_account"));
+        else if*/ (estateId) {
+          var estRecord = nlapiLoadRecord('customer', estateId);
+          accountField.setDefaultValue(estRecord.getFieldValue("custentity_client_signed_blocked_account"));
+        }
+
+        var accountField = form.addField("custpage_courtapproved_blocked_account", "checkbox", "Court Approved Blocked Account", null, "estate");
+        if /*(customer)
+          accountField.setDefaultValue(customer.getFieldValue("custentity_courtapproved_blocked_account"));
+        else if*/ (estateId) {
+          var estRecord = nlapiLoadRecord('customer', estateId);
+          accountField.setDefaultValue(estRecord.getFieldValue("custentity_courtapproved_blocked_account"));
+        }
+        
         var accountField = form.addField("custpage_problem_case", "checkbox", "Problem Case", null, "estate");
 //                if(customer)
 //                    accountField.setDefaultValue(customer.getFieldValue("custentity_problem_case"));
 //                else if(estateId)
 //                {
+        
         var estRecord = nlapiLoadRecord('customer', estateId);
         accountField.setDefaultValue(estRecord.getFieldValue("custentity_problem_case"));
 //                }
