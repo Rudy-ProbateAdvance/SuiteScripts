@@ -1,7 +1,7 @@
 /**
  *@NApiVersion 2.1
  */
-define(['N/https', 'N/file'], function(https, file){
+define(['N/https'], function(https){
 
   function parseAddress(address) {
     if(!address || address.trim().toUpperCase().slice(0,2)=='RP') {
@@ -16,7 +16,13 @@ define(['N/https', 'N/file'], function(https, file){
 //    log.debug('geocodeget() entry');
     var request={};
     var retval={success:false};
-//    var f=file.load
+    try {
+      var f=file.load('660199');
+      var security=JSON.parse(f.getContents());
+      log.debug('key:'+security.pa-gmaps-key);
+    } catch(e) {
+      log.error({title:"unable to load apikeys from file", details:JSON.stringify(e)});
+    }
 //    var apikey="AIzaSyBlAKixNRLrv4OpguDveUoogkubWHw-i50"; // my personal API key
     var apikey="AIzaSyAjAjI1ii7gWPPzAxs33v7uYmfR8gtW2bk"; // PA API key
     var addr=address;
