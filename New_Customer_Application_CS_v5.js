@@ -6,6 +6,7 @@
 
 function clearchanged() {
 //  window.ischanged=false;
+  alert("clearchanged");
   return true;
 }
 
