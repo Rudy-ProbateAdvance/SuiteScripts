@@ -382,47 +382,12 @@ function New_Customer_Application(request, response) {
           fld.setDefaultValue(countyval);
         }
 
-        if(casefilenum!=null) {
-          var countyname=nlapiLookupField('customrecord173',countyval, 'name');
-          nlapiLogExecution("DEBUG", "countyname:"+countyname);
-          var stcty=countyname.split("_");
-          var filenamecomponents=[];
-          filenamecomponents.push(stateToAbbrev(stcty[0]));
-          filenamecomponents.push(stcty[1]);
-          filenamecomponents.push(casefilenum);
-          var casefilename=filenamecomponents.join("_");
-          var rs = nlapiSearchRecord("file",null,
-            [
-//               ["name","contains",casefilename]
-               ["formulatext: regexp_replace({name},'\\..*$','')","is",casefilename]
-            ], 
-            [
-               new nlobjSearchColumn("name"), 
-               new nlobjSearchColumn("folder"), 
-               new nlobjSearchColumn("documentsize"), 
-               new nlobjSearchColumn("url"), 
-               new nlobjSearchColumn("created"), 
-               new nlobjSearchColumn("modified"), 
-               new nlobjSearchColumn("filetype")
-            ]
-            );
-          if(rs==null)
-            rs=[];
-          switch(rs.length) {
-            case 0:
-              fldval='No file uploaded yet';
-              break;
-            case 1:
-              var filename=rs[0].getValue("name");
-              var fileurl=rs[0].getValue("url");
-              var linktext='<a target="_blank" href="'+fileurl+'">'+filename+'</a>';
-              fldval=linktext;
-              break;
-            default:
-              fldval="More than one match - need further investigation";
-          }
-          casefilelinkfld.setDefaultValue(fldval);
-        }
+        if(casefilenum!=null && countyval!=null) 
+          fldval=getcasefilelink(casefilenum, countyval);
+        else
+          fldval="No file - One of Case # or County name is empty";
+
+        casefilelinkfld.setDefaultValue(fldval);
 
 
         
@@ -2620,4 +2585,45 @@ function stateToAbbrev(statename) {
     'wyoming':'WY',
     'wy':'Wyoming',
   }[statename.toLowerCase()];
+}
+
+function getcasefilelink(casenum, countyval) {
+  var retval=null;
+  var countyname=nlapiLookupField('customrecord173',countyval, 'name');
+  var stcty=countyname.split("_");
+  var filenamecomponents=[];
+  filenamecomponents.push(stateToAbbrev(stcty[0]));
+  filenamecomponents.push(stcty[1]);
+  filenamecomponents.push(casenum);
+  var casefilename=filenamecomponents.join("_");
+  var rs = nlapiSearchRecord("file",null,
+    [
+       ["formulatext: regexp_replace({name},'\\..*$','')","is",casefilename]
+    ], 
+    [
+       new nlobjSearchColumn("name"), 
+       new nlobjSearchColumn("folder"), 
+       new nlobjSearchColumn("documentsize"), 
+       new nlobjSearchColumn("url"), 
+       new nlobjSearchColumn("created"), 
+       new nlobjSearchColumn("modified"), 
+       new nlobjSearchColumn("filetype")
+    ]
+    );
+  if(rs==null)
+    rs=[];
+  switch(rs.length) {
+    case 0:
+      retval='No file uploaded yet';
+      break;
+    case 1:
+      var filename=rs[0].getValue("name");
+      var fileurl=rs[0].getValue("url");
+      var linktext='<a target="_blank" href="'+fileurl+'">'+filename+'</a>';
+      retval=linktext;
+      break;
+    default:
+      retval="More than one match - need further investigation";
+  }
+  return retval;
 }

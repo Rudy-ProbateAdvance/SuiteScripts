@@ -6,7 +6,6 @@
 
 function clearchanged() {
 //  window.ischanged=false;
-//  alert("clearchanged");
   return true;
 }
 
@@ -3797,4 +3796,3 @@ function getcasefilelink(casenum, countyval) {
   }
   return retval;
 }
-
