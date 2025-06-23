@@ -86,7 +86,9 @@ function New_Cust_App_CS_PI() {
 }
 
 function New_Cust_App_CS_FC(type, name, linenum) {
-
+  if(window.suppressfieldchangedfunction==true) {
+    return;
+  }
 
   if(navigator.userActivation.hasBeenActive) {
     if (window.inactivitytimerid) {
@@ -230,6 +232,22 @@ function New_Cust_App_CS_FC(type, name, linenum) {
     } else if (name == "custpage_percent_equity_due" || name == "custpage_bequest_due" || name == "custpage_liens_judgments" || name == "custpage_existing_agreements" || name == "custpage_adv_to_val_ratio") {
       calculateMaxAdvance();
     } else if (name == "custpage_price_level" || name == "custpage_desired_advance" || name == "custpage_early_rebate_1" || name == "custpage_early_rebate_2" || name == "custpage_early_rebate_3") {
+      var pricelvl = nlapiGetFieldValue("custpage_price_level");
+      if (name == "custpage_price_level" && pricelvl == 6) {
+//        debugger;
+//        window.suppressfieldchangedfunction=true;
+        nlapiSetFieldValue("custpage_desired_advance", 5000);
+        nlapiSetFieldValue("custpage_months_remaining", 18);
+//        nlapiSetFieldValue("custpage_early_rebate_1", "");
+//        nlapiSetFieldValue("custpage_early_rebate_2", "");
+//        nlapiSetFieldValue("custpage_early_rebate_3", "");
+//        nlapiSetFieldValue("custpage_assignment_size", 9900);
+//        nlapiSetFieldValue("custpage_early_rebate_1_amt", "");
+//        nlapiSetFieldValue("custpage_early_rebate_2_amt", "");
+//        nlapiSetFieldValue("custpage_early_rebate_3_amt", "");
+//        window.suppressfieldchangedfunction=false;
+//        return;
+      }
       if (name == "custpage_desired_advance") {
         var desiredAdvance = nlapiGetFieldValue("custpage_desired_advance");
         var maxAdvance = nlapiGetFieldValue("custpage_max_advance");
@@ -1393,7 +1411,15 @@ function calculatePrice() {
   var priceLevel = nlapiGetFieldValue("custpage_price_level");
   var numMonths = nlapiGetFieldValue("custpage_months_remaining");
   var advance = parseFloat(nlapiGetFieldValue("custpage_desired_advance"));
-  if (priceLevel == 5) { //LEVEL 5 Starting
+  if (priceLevel == 6) {
+    nlapiSetFieldValue("custpage_early_rebate_1", "", false, true);
+    nlapiSetFieldValue("custpage_early_rebate_2", "", false, true);
+    nlapiSetFieldValue("custpage_early_rebate_3", "", false, true);
+    nlapiSetFieldValue("custpage_assignment_size", 9900);
+    nlapiSetFieldValue("custpage_early_rebate_1_amt", "", false, true);
+    nlapiSetFieldValue("custpage_early_rebate_2_amt", "", false, true);
+    nlapiSetFieldValue("custpage_early_rebate_3_amt", "", false, true);
+  } else if (priceLevel == 5) { //LEVEL 5 Starting
     var assignment_size = advance * 2;
     nlapiSetFieldValue("custpage_assignment_size", assignment_size, true, true);
     nlapiSetFieldValue("custpage_early_rebate_1", 3, false, true);

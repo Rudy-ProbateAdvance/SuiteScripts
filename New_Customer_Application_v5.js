@@ -382,10 +382,10 @@ function New_Customer_Application(request, response) {
           fld.setDefaultValue(countyval);
         }
 
-        if(casefilenum!=null && countyval!=null) 
+        if(casefilenum!=null && countyval!=null && countyval!='') 
           fldval=getcasefilelink(casefilenum, countyval);
         else
-          fldval="No file - One of Case # or County name is empty";
+          fldval="No case number present";
 
         casefilelinkfld.setDefaultValue(fldval);
 
