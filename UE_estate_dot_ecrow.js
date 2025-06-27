@@ -1,11 +1,11 @@
-/**
+/** this is a test just to find file differences
 *@NApiVersion 2.0
 *@NScriptType UserEventScript
 */
 define(['N/record', 'N/search'], function (record, search) {
     function beforeLoad(context) {
         //all your Before Load actions will go in here.
-    }
+    } //just testing
 
     function beforeSubmit(context) {
         //all your Before Submit actions will go in here.
