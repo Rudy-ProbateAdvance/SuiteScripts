@@ -185,7 +185,7 @@ function New_Cust_App_CS_FC(type, name, linenum) {
       if (followupId != null && followupId != "") {
         nlapiSubmitField("customrecord_customer_follow_up", followupId, "custrecord_assigned", assigned);
       }
-    } else if (type == "custpage_properties" && (name == "custpage_property_value" || name == "custpage_property_mortgage" || name == "custpage_property_owned" || name == "custpage_property_note" || name == "custpage_property_sold" || name == "custpage_property_escrow" || name == "custpage_property_dot")) {
+    } else if (type == "custpage_properties" && (name == "custpage_property_value" || name == "custpage_property_mortgage" || name == "custpage_property_owned" || name == "custpage_property_note" || name == "custpage_property_sold" || name == "custpage_property_escrow" || name == "custpage_property_dot" || name == "custpage_property_dot_subdate" || name == "custpage_property_dot_recdate")) {
       try {
         var value = nlapiGetCurrentLineItemValue("custpage_properties", "custpage_property_value");
         var mortgage = nlapiGetCurrentLineItemValue("custpage_properties", "custpage_property_mortgage");
@@ -200,6 +200,34 @@ function New_Cust_App_CS_FC(type, name, linenum) {
         }
         if (name == "custpage_property_dot" && propertieId) {
           nlapiSubmitField("customrecord_property", propertieId, "custrecord_dot", dot);
+          if(dot=='' || dot==null || dot==' ') {
+            window.suppressfieldchangedfunction=true;
+            nlapiSetCurrentLineItemValue("custpage_properties", "custpage_property_dot_subdate", "");
+            nlapiSetCurrentLineItemValue("custpage_properties", "custpage_property_dot_recdate", "");
+            window.suppressfieldchangedfunction=false;
+          }
+        }
+        if (name == "custpage_property_dot_subdate" && propertieId) {
+          if(dot=='' || dot==null || dot==' ') {
+            alert("Cannot set a DOT date if DOT is not selected");
+            window.suppressfieldchangedfunction=true;
+            nlapiSetCurrentLineItemValue("custpage_properties", "custpage_property_dot_subdate", "");
+            nlapiSetCurrentLineItemValue("custpage_properties", "custpage_property_dot_recdate", "");
+            window.suppressfieldchangedfunction=false;
+          }
+          var val=nlapiGetCurrentLineItemValue("custpage_properties", "custpage_property_dot_subdate");
+          nlapiSubmitField("customrecord_property", propertieId, "custrecord_property_dot_subdate", val);
+        }
+        if (name == "custpage_property_dot_recdate" && propertieId) {
+          if(dot=='' || dot==null || dot==' ') {
+            alert("Cannot set a DOT date if DOT is not selected");
+            window.suppressfieldchangedfunction=true;
+            nlapiSetCurrentLineItemValue("custpage_properties", "custpage_property_dot_subdate", "");
+            nlapiSetCurrentLineItemValue("custpage_properties", "custpage_property_dot_recdate", "");
+            window.suppressfieldchangedfunction=false;
+          }
+          var val=nlapiGetCurrentLineItemValue("custpage_properties", "custpage_property_dot_recdate");
+          nlapiSubmitField("customrecord_property", propertieId, "custrecord_property_dot_recdate", val);
         }
         if (name == "custpage_property_sold" && propertieId) {
           nlapiSubmitField("customrecord_property", propertieId, "custrecord_sold", sold);
@@ -3090,6 +3118,7 @@ function takeSnapshot(options) { //takeSnapshot({event:'INVOICE', documenttype:'
   console.log('done.');
 
   console.log('processing property subrecords...');
+  debugger;
   var propertyarray = propertydata.trim().split('\n');
   if (propertyarray.length > 1) {
     for (var i = 1; i < propertyarray.length; i++) {
@@ -3101,7 +3130,7 @@ function takeSnapshot(options) { //takeSnapshot({event:'INVOICE', documenttype:'
       psrec.setFieldValue('custrecord_propertysnapshot_value', psfields[2]);
       var addrdata = nlapiLookupField(
           'customrecord_property',
-          psfields[14],
+          psfields[16],
           [
             'custrecord_property_address',
             'custrecord_property_city',
@@ -3116,6 +3145,9 @@ function takeSnapshot(options) { //takeSnapshot({event:'INVOICE', documenttype:'
       psrec.setFieldValue('custrecord_propertysnapshot_mortgage', psfields[3]);
       psrec.setFieldValue('custrecord_propertysnapshot_pctowned', psfields[4]);
       psrec.setFieldValue('custrecord_propertysnapshot_netvalue', psfields[5]);
+      psrec.setFieldValue('custrecord_propertysnapshot_dot', psfields[8]);
+      psrec.setFieldValue('custrecord_propertysnapshot_dot_subdate', psfields[9]);
+      psrec.setFieldValue('custrecord_propertysnapshot_dot_recdate', psfields[10]);
       nlapiSubmitRecord(psrec);
     }
   }
@@ -3171,6 +3203,8 @@ function getSublistFields(list) {
         'custpage_property_sold',
         'custpage_property_escrow',
         'custpage_property_dot',
+        'custpage_property_dot_subdate',
+        'custpage_property_dot_recdate',
         'custpage_property_note',
         'custpage_property_estamount',
         'custpage_property_preforeclosure_status',
@@ -3347,6 +3381,8 @@ function getSublistHeaders(list) {
         'Sold?',
         'Escrow',
         'DOT',
+        'DOT Submission Date',
+        'DOT Recording Date',
         'Note',
         'Estimated Value',
         'Preforeclosure Status',
