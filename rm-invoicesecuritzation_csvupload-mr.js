@@ -26,7 +26,7 @@ define(['N/email', 'N/file', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/run
       log.error('invalid file format');
       return;
     }
-    var filecontents = f.getContents();
+    var filecontents = f.getContents().replace(/"/g, '');
     var data = {};
     var invoicedata={};
     var errors = {};
@@ -67,6 +67,7 @@ define(['N/email', 'N/file', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/run
 // find all associated invoices
       
     q=`select t.tranid as tranid, t.id as internalid, t.status as status, tl.foreignamountunpaid as amountremaining from transaction t join transactionline tl on tl.transaction=t.id where t.tranid in (${idstring}) and tl.foreignamountunpaid is not null`;
+    log.debug('query', q);
     var results=rmfunc.getQueryResults(q);
       
     results.forEach(function (result) {
@@ -124,6 +125,7 @@ define(['N/email', 'N/file', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/run
     
   function map(context) {
 //    return;
+    log.debug({title:"context", details:JSON.stringify(context)});
     var invoice=JSON.parse(context['value']);
     if(!invoice)
       return;
@@ -135,6 +137,14 @@ define(['N/email', 'N/file', 'N/record', 'N/search', 'N/ui/serverWidget', 'N/run
       type: 'invoice',
       id: invoice.internalid
     });
+    if(invoice.multiple=='x') {
+      invoicerec.setValue({fieldId:'custbody_securitizationgroupname', value:''});
+      invoicerec.save();
+      invoice.invsec.forEach(function(invsec) {
+        record.delete({type:'customrecord_invsecuritization', id:invsec.invsecintid});
+      });
+      return;
+    }
     if(invoice.hasOwnProperty('errors')) {
 // don't process invoices with errors
       log.error('invoice '+invoice.assetid+' has errors', JSON.stringify(invoice));
