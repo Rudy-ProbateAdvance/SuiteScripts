@@ -616,45 +616,42 @@ function New_Customer_Application(request, response) {
 
         var accountField = form.addField("custpage_diligence_blocked_account_letter", "checkbox", "Blocked Account Letter", null, "estate");
         if (estateId) {
-          if(estate!=null) {
-            estRecord=estate;
-          } else {
-            var estRecord = nlapiLoadRecord('customer', estateId);
+          if(estate==null) {
+            estate = nlapiLoadRecord('customer', estateId);
           }
-          accountField.setDefaultValue(estRecord.getFieldValue("custentity_blocked_account_letter"));
+          accountField.setDefaultValue(estate.getFieldValue("custentity_blocked_account_letter"));
         }
 
         var accountField = form.addField("custpage_client_signed_blocked_account", "checkbox", "Client Signed Blocked Account Consent", null, "estate");
         if (estateId) {
-          if(estate!=null) {
-            estRecord=estate;
-          } else {
-            var estRecord = nlapiLoadRecord('customer', estateId);
+          if(estate==null) {
+            var estate = nlapiLoadRecord('customer', estateId);
           }
-          accountField.setDefaultValue(estRecord.getFieldValue("custentity_client_signed_blocked_account"));
+          accountField.setDefaultValue(estate.getFieldValue("custentity_client_signed_blocked_account"));
         }
 
         var accountField = form.addField("custpage_courtapproved_blocked_account", "checkbox", "Court Approved Blocked Account", null, "estate");
         if (estateId) {
-          if(estate!=null) {
-            estRecord=estate;
-          } else {
-            var estRecord = nlapiLoadRecord('customer', estateId);
+          if(estate==null) {
+            var estate = nlapiLoadRecord('customer', estateId);
           }
-          accountField.setDefaultValue(estRecord.getFieldValue("custentity_courtapproved_blocked_account"));
+          accountField.setDefaultValue(estate.getFieldValue("custentity_courtapproved_blocked_account"));
         }
         
         var accountField = form.addField("custpage_problem_case", "checkbox", "Problem Case", null, "estate");
         if (estateId) {
-          if(estate!=null) {
-            estRecord=estate;
-          } else {
-            var estRecord = nlapiLoadRecord('customer', estateId);
+          if(estate==null) {
+            var estate = nlapiLoadRecord('customer', estateId);
           }
-          accountField.setDefaultValue(estRecord.getFieldValue("custentity_problem_case"));
+          accountField.setDefaultValue(estate.getFieldValue("custentity_problem_case"));
         }
 //                }
         //escrowField.setDisplayType("disabled");            ////// Change
+
+        var lispenfld = form.addField("custpage_diligence_lispendens", "checkbox", "Lis Pendens", null, "estate");
+        lispenfld.setDisplayType("disabled");            ////// Change
+        var moifld = form.addField("custpage_diligence_moi", "checkbox", "MOI", null, "estate");
+        moifld.setDisplayType("disabled");            ////// Change
 
         fld = form.addField("custpage_total_property", "integer", "Total Value of Real Property", null, "financials");
         fld.setDisplayType("inline");
@@ -718,6 +715,8 @@ function New_Customer_Application(request, response) {
         fld = properties.addField("custpage_property_dot", "select", "DOT", "customlist_dot_list");
         fld = properties.addField("custpage_property_dot_subdate", "date", "DOT Submitted");
         fld = properties.addField("custpage_property_dot_recdate", "date", "DOT Recorded");
+        fld = properties.addField("custpage_property_lispendens", "checkbox", "Lis Pendens");
+        fld = properties.addField("custpage_property_moi", "checkbox", "MOI");
         fld = properties.addField("custpage_property_note", "textarea", "Note");
         fld.setDisplayType("entry");
         fld = properties.addField("custpage_property_estamount", "integer", "ESTIMATED Value");
@@ -855,6 +854,8 @@ function New_Customer_Application(request, response) {
           cols.push(new nlobjSearchColumn("custrecord_dot"));
           cols.push(new nlobjSearchColumn("custrecord_property_dot_subdate"));
           cols.push(new nlobjSearchColumn("custrecord_property_dot_recdate"));
+          cols.push(new nlobjSearchColumn("custrecord_property_lispendens"));
+          cols.push(new nlobjSearchColumn("custrecord_property_moi"));
           cols.push(new nlobjSearchColumn("custrecord_est_mortage_amt_attom"));
           //cols.push(new nlobjSearchColumn("custrecord_swagger_script_last_run_date"));
           //cols.push(new nlobjSearchColumn("custrecord_est_mortage_amt_last_update"));
@@ -867,6 +868,8 @@ function New_Customer_Application(request, response) {
 
           var propertyDot;
           var propertyEscrow = "F";
+          var propertyLispendens="F";
+          var propertyMOI="F";
           var results = nlapiSearchRecord("customrecord_property", null, filters, cols);
           if (results) {
             var lines = [];
@@ -879,6 +882,11 @@ function New_Customer_Application(request, response) {
                 propertyDot = results[x].getValue("custrecord_dot");
               if (propertyEscrow == "F")
                 propertyEscrow = results[x].getValue("custrecord_escrow");
+              if(propertyLispendens=="F")
+                propertyLispendens=results[x].getValue("custrecord_property_lispendens");
+              if(propertyMOI=="F")
+                propertyMOI=results[x].getValue("custrecord_property_moi");
+              
               lines.push({
                 custpage_property_id: results[x].getId(),
 
@@ -906,6 +914,8 @@ function New_Customer_Application(request, response) {
                 custpage_property_dot: results[x].getValue("custrecord_dot"),
                 custpage_property_dot_subdate: results[x].getValue("custrecord_property_dot_subdate"),
                 custpage_property_dot_recdate: results[x].getValue("custrecord_property_dot_recdate"),
+                custpage_property_lispendens: results[x].getValue("custrecord_property_lispendens"),
+                custpage_property_moi: results[x].getValue("custrecord_property_moi"),
                 custpage_property_owner_name: results[x].getValue("custrecord_owner_name"),
                 custpage_property_property_type: results[x].getValue("custrecord_property_type"),
                 custpage_property_apn: results[x].getValue("custrecord_apn"),
@@ -920,6 +930,10 @@ function New_Customer_Application(request, response) {
           escrowField.setDefaultValue("T");
         if (propertyDot == 1 || propertyDot == 2)
           dotField.setDefaultValue("T");
+        if(propertyLispendens == "T")
+          lispenfld.setDefaultValue("T");
+        if(propertyMOI == "T")
+          moifld.setDefaultValue("T");
         nlapiLogExecution("debug", "Added Properties");
 
         var accounts = form.addSubList("custpage_accounts", "inlineeditor", "Cash Accounts/Other Assets", "financials");

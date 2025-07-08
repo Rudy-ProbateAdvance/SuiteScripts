@@ -185,7 +185,7 @@ function New_Cust_App_CS_FC(type, name, linenum) {
       if (followupId != null && followupId != "") {
         nlapiSubmitField("customrecord_customer_follow_up", followupId, "custrecord_assigned", assigned);
       }
-    } else if (type == "custpage_properties" && (name == "custpage_property_value" || name == "custpage_property_mortgage" || name == "custpage_property_owned" || name == "custpage_property_note" || name == "custpage_property_sold" || name == "custpage_property_escrow" || name == "custpage_property_dot" || name == "custpage_property_dot_subdate" || name == "custpage_property_dot_recdate")) {
+    } else if (type == "custpage_properties" && (name == "custpage_property_value" || name == "custpage_property_mortgage" || name == "custpage_property_owned" || name == "custpage_property_note" || name == "custpage_property_sold" || name == "custpage_property_escrow" || name == "custpage_property_dot" || name == "custpage_property_dot_subdate" || name == "custpage_property_dot_recdate" || name == "custpage_property_lispendens" || name == "custpage_property_moi")) {
       try {
         var value = nlapiGetCurrentLineItemValue("custpage_properties", "custpage_property_value");
         var mortgage = nlapiGetCurrentLineItemValue("custpage_properties", "custpage_property_mortgage");
@@ -228,6 +228,14 @@ function New_Cust_App_CS_FC(type, name, linenum) {
           }
           var val=nlapiGetCurrentLineItemValue("custpage_properties", "custpage_property_dot_recdate");
           nlapiSubmitField("customrecord_property", propertieId, "custrecord_property_dot_recdate", val);
+        }
+        if (name == "custpage_property_lispendens" && propertieId) {
+          var val=nlapiGetCurrentLineItemValue("custpage_properties", "custpage_property_lispendens");
+          nlapiSubmitField("customrecord_property", propertieId, "custrecord_property_lispendens", val);
+        }
+        if (name == "custpage_property_moi" && propertieId) {
+          var val=nlapiGetCurrentLineItemValue("custpage_properties", "custpage_property_moi");
+          nlapiSubmitField("customrecord_property", propertieId, "custrecord_property_moi", val);
         }
         if (name == "custpage_property_sold" && propertieId) {
           nlapiSubmitField("customrecord_property", propertieId, "custrecord_sold", sold);
@@ -3130,7 +3138,7 @@ function takeSnapshot(options) { //takeSnapshot({event:'INVOICE', documenttype:'
       psrec.setFieldValue('custrecord_propertysnapshot_value', psfields[2]);
       var addrdata = nlapiLookupField(
           'customrecord_property',
-          psfields[16],
+          psfields[18],
           [
             'custrecord_property_address',
             'custrecord_property_city',
