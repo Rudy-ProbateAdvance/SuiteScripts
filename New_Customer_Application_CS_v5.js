@@ -20,12 +20,13 @@ if(!window.NS.statecountyalerts) {
 
 function New_Cust_App_CS_PI() {
   var savewarning=document.createElement('div');
-  savewarning.textContent="Save in progress, stand by...";
+  savewarning.innerHTML="<B><Center>Save in progress, stand by...</center></B>";
   savewarning.id='save-alert-box';
   savewarning.style='display:none; \
   position: fixed; \
   top: 50%; \
   left: 50%; \
+  width: 25%; \
   transform: translate(-50%, -50%) /*scale(2.0, 2.0)*/; \
   background-color: #cff5ff; \
   padding: 20px; \
@@ -2863,8 +2864,8 @@ function takeSnapshot(options) { //takeSnapshot({event:'INVOICE', documenttype:'
   try {
     var userid=nlapiGetUser();
     if(userid=='2299863') {
-      debugger;
-//      return true;
+//      debugger;
+      return true;
     }
     console.log('begin snapshot...');
     if (!!options && !!options.event)
