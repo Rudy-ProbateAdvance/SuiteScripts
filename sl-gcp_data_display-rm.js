@@ -106,6 +106,7 @@ define(['N/record', 'N/search', 'N/query', 'N/runtime', 'N/ui/serverWidget'], fu
       {type:'text', id:'custpage_customer_zip_code', label:'Customer Zip', container:'custpage_customer'},
       {type:'text', id:'custpage_customer_status', label:'Customer Status', container:'custpage_customer'},
       {type:'text', id:'custpage_customer_exclusion_reason', label:'Customer Exclusion Reason', container:'custpage_customer'},
+      {type:'text', id:'custpage_customer_unsubscribe', label:'Customer Unsubscribe Code', container:'custpage_customer'},
       {type:'text', id:'custpage_customer_comment', label:'Customer Comment', container:'custpage_customer'}
     ];
   }

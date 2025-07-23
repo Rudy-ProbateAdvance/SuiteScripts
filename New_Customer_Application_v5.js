@@ -94,7 +94,8 @@ function New_Customer_Application(request, response) {
 
         form.setScript("customscript_new_cust_app_cs");
         form.addButton('custpage_savebutton', 'Save', 'savebuttonclick();');
-        form.addButton('auto_so_if_btn', 'Print Shipping Label', 'onAutoSoIfBtnClick(' + request.getParameter("customer") + ')');
+//        form.addButton('custpage_searchbutton', 'Search Lead Data', 'searchbuttonclick();');
+//        form.addButton('auto_so_if_btn', 'Print Shipping Label', 'onAutoSoIfBtnClick(' + request.getParameter("customer") + ')');
 
         var fld;
         var fldGroup;
@@ -630,7 +631,7 @@ function New_Customer_Application(request, response) {
           accountField.setDefaultValue(estate.getFieldValue("custentity_client_signed_blocked_account"));
         }
 
-        var accountField = form.addField("custpage_courtapproved_blocked_account", "checkbox", "Court Approved Blocked Account", null, "estate");
+        var accountField = form.addField("custpage_courtapproved_blocked_account", "checkbox", "Blocked Account Obtained", null, "estate");
         if (estateId) {
           if(estate==null) {
             var estate = nlapiLoadRecord('customer', estateId);
@@ -2499,6 +2500,7 @@ function getLeadSources() {
   leadsources.push({value: "-5", text: "Google"});
   leadsources.push({value: "4", text: "Heir Referral"});
   leadsources.push({value: "689", text: "James Leestma"});
+  leadsources.push({value: "7646", text: "Email"});
   leadsources.push({value: "9524", text: "Oasis"});
   leadsources.push({value: "-6", text: "Peachtree"});
   leadsources.push({value: "65743", text: "Rep"});

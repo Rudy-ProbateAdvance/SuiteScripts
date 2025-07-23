@@ -19,6 +19,16 @@ if(!window.NS.statecountyalerts) {
 
 
 function New_Cust_App_CS_PI() {
+  var elem=document.getElementById('custpage_courtapproved_blocked_account_fs_lbl');
+  var x=nlapiGetFieldValue('custpage_diligence_blocked_account_letter');
+  var y=nlapiGetFieldValue('custpage_client_signed_blocked_account');
+  var z=nlapiGetFieldValue('custpage_courtapproved_blocked_account');
+  if((x=='T' || y=='T')&&z=='F') {
+    elem.style.backgroundColor='#ff0000';
+  } else {
+    elem.style.backgroundColor=null;
+  }
+
   var savewarning=document.createElement('div');
   savewarning.innerHTML="<B><Center>Save in progress, stand by...</center></B>";
   savewarning.id='save-alert-box';
@@ -89,6 +99,19 @@ function New_Cust_App_CS_PI() {
 
 function New_Cust_App_CS_FC(type, name, linenum) {
   if(window.suppressfieldchangedfunction==true) {
+    return;
+  }
+
+  if(name=='custpage_diligence_blocked_account_letter' || name=='custpage_client_signed_blocked_account' || name=='custpage_courtapproved_blocked_account') {
+    var elem=document.getElementById('custpage_courtapproved_blocked_account_fs_lbl');
+    var x=nlapiGetFieldValue('custpage_diligence_blocked_account_letter');
+    var y=nlapiGetFieldValue('custpage_client_signed_blocked_account');
+    var z=nlapiGetFieldValue('custpage_courtapproved_blocked_account');
+    if((x=='T' || y=='T')&&z=='F') {
+      elem.style.backgroundColor='#ff0000';
+    } else {
+      elem.style.backgroundColor=null;
+    }
     return;
   }
 
@@ -272,6 +295,7 @@ function New_Cust_App_CS_FC(type, name, linenum) {
     } else if (name == "custpage_price_level" || name == "custpage_desired_advance" || name == "custpage_early_rebate_1" || name == "custpage_early_rebate_2" || name == "custpage_early_rebate_3") {
       var pricelvl = nlapiGetFieldValue("custpage_price_level");
       if (name == "custpage_price_level" && pricelvl == 6) {
+//        debugger;
 //        window.suppressfieldchangedfunction=true;
         nlapiSetFieldValue("custpage_desired_advance", 5000);
         nlapiSetFieldValue("custpage_months_remaining", 18);
@@ -2823,11 +2847,11 @@ function New_Cust_App_CS_VD(type) {
   }
 }
 
-function onAutoSoIfBtnClick(custId) {
-  var soUrl = nlapiResolveURL("SUITELET", "customscript_auto_so_and_fulfillment", "customdeploy_auto_so_and_fulfillment") + '&custpage_customer=' + custId;
-
-  window.location.href = soUrl;
-}
+//function onAutoSoIfBtnClick(custId) {
+//  var soUrl = nlapiResolveURL("SUITELET", "customscript_auto_so_and_fulfillment", "customdeploy_auto_so_and_fulfillment") + '&custpage_customer=' + custId;
+//
+//  window.location.href = soUrl;
+//}
 
 function setnextevent() {
   //    if(user=nlapiGetContext().getUser()==2299863) {
@@ -2861,315 +2885,308 @@ function setnextevent() {
 }
 
 function takeSnapshot(options) { //takeSnapshot({event:'INVOICE', documenttype:'invoice', documentid:invoiceId});
-  try {
-    var userid=nlapiGetUser();
-    if(userid=='2299863') {
-//      debugger;
-      return true;
-    }
-    console.log('begin snapshot...');
-    if (!!options && !!options.event)
-      var snapshotevent = options.event;
-    else
-      var snapshotevent = 'TEST';
-    var ssrec = nlapiCreateRecord('customrecord_custdata');
-    console.log('setting snapshot date');
-    var d = new Date();
-    var snapshotdate = (d.getMonth() + 1).toString().padStart(2, '0') + '/' + d.getDate().toString().padStart(2, '0') + '/' + d.getFullYear();
-    ssrec.setFieldValue('custrecord_custdata_snapshotdate', snapshotdate);
-    console.log('setting event type');
-    ssrec.setFieldValue('custrecord_custdata_eventtype', snapshotevent);
-  
-    console.log('processing normal fields...');
-    ssrec.setFieldValue('custrecord_custdata_cust', nlapiGetFieldValue('custpage_customer_id'));
-    ssrec.setFieldValue('custrecord_custdata_cust_firstname', nlapiGetFieldValue('custpage_first_name'));
-    ssrec.setFieldValue('custrecord_custdata_cust_lastname', nlapiGetFieldValue('custpage_last_name'));
-    ssrec.setFieldValue('custrecord_custdata_cust_middlename', nlapiGetFieldValue('custpage_middle_initial'));
-    ssrec.setFieldValue('custrecord_custdata_cust_addr', nlapiGetFieldValue('custpage_address'));
-    ssrec.setFieldValue('custrecord_custdata_cust_city', nlapiGetFieldValue('custpage_city'));
-    ssrec.setFieldValue('custrecord_custdata_cust_state', nlapiGetFieldText('custpage_state'));
-    ssrec.setFieldValue('custrecord_custdata_cust_statewarning', nlapiGetFieldValue('custpage_state_warn'));
-    ssrec.setFieldValue('custrecord_custdata_cust_zipcode', nlapiGetFieldValue('custpage_zip'));
-    ssrec.setFieldValue('custrecord_custdata_cust_salesrep', nlapiGetFieldValue('custpage_sales_rep'));
-    ssrec.setFieldValue('custrecord_custdata_cust_phone', nlapiGetFieldValue('custpage_phone'));
-    ssrec.setFieldValue('custrecord_custdata_cust_email', nlapiGetFieldValue('custpage_email'));
-    ssrec.setFieldValue('custrecord_custdata_cust_leadsource', nlapiGetFieldText('custpage_how_did_they_find_us'));
-    ssrec.setFieldValue('custrecord_custdata_cust_laststatus', nlapiGetFieldText('custpage_latest_status'));
-    ssrec.setFieldValue('custrecord_custdata_cust_contactnotes', nlapiGetFieldValue('custpage_notes'));
-    ssrec.setFieldValue('custrecord_custdata_cust_followuptype', nlapiGetFieldValue('custpage_followup_type'));
-    ssrec.setFieldValue('custrecord_custdata_cust_laststatusnotes', nlapiGetFieldValue('custpage_latest_status_notes'));
-    ssrec.setFieldValue('custrecord_custdata_est_decedentexisting', nlapiGetFieldValue('custpage_estate'));
-    ssrec.setFieldValue('custrecord_custdata_est_decedentnew', nlapiGetFieldValue('custpage_decedent'));
-    ssrec.setFieldValue('custrecord_custdata_est_casefileno', nlapiGetFieldValue('custpage_case_no'));
-    ssrec.setFieldValue('custrecord_custdata_est_state', nlapiGetFieldText('custpage_estate_state'));
-    ssrec.setFieldValue('custrecord_custdata_est_statewarning', nlapiGetFieldValue('custpage_estate_state_warn'));
-    ssrec.setFieldValue('custrecord_custdata_est_county', nlapiGetFieldText('custpage_estate_county'));
-    ssrec.setFieldValue('custrecord_custdata_est_estdistdate', nlapiGetFieldValue('custpage_estate_est_date_distr'));
-    ssrec.setFieldValue('custrecord_custdata_est_filingdate', nlapiGetFieldValue('custpage_estate_filing_date'));
-    ssrec.setFieldValue('custrecord_custdata_est_nextevent', nlapiGetFieldValue('custpage_estate_next_event'));
-    ssrec.setFieldValue('custrecord_custdata_est_lastcalldate', nlapiGetFieldValue('custpage_estate_next_phonecall'));
-    ssrec.setFieldValue('custrecord_custdata_est_estatestatus', nlapiGetFieldText('custpage_est_status'));
-    ssrec.setFieldValue('custrecord_custdata_est_estatetype', nlapiGetFieldValue('custpage_estatetype'));
-    ssrec.setFieldValue('custrecord_custdata_est_acctsecurity', nlapiGetFieldValue('custpage_acctsecurity'));
-    ssrec.setFieldValue('custrecord_custdata_est_multiple', nlapiGetFieldValue('custpage_multipleestatestrusts'));
-    ssrec.setFieldValue('custrecord_custdata_est_supervisionlevel', nlapiGetFieldValue('custpage_supervisionlevel'));
-    ssrec.setFieldValue('custrecord_custdata_est_claimsperiodend', nlapiGetFieldValue('custpage_claimsperiodend'));
-    ssrec.setFieldValue('custrecord_custdata_est_attyname', nlapiGetFieldValue('custpage_attorney_name'));
-    ssrec.setFieldValue('custrecord_custdata_est_firmname', nlapiGetFieldValue('custpage_firm_name'));
-    ssrec.setFieldValue('custrecord_custdata_est_firmaddr', nlapiGetFieldValue('custpage_attorney_address'));
-    ssrec.setFieldValue('custrecord_custdata_est_firmcity', nlapiGetFieldValue('custpage_attorney_city'));
-    ssrec.setFieldValue('custrecord_custdata_est_firmstate', nlapiGetFieldText('custpage_attorney_state'));
-    ssrec.setFieldValue('custrecord_custdata_est_firmzipcode', nlapiGetFieldValue('custpage_attorney_zip'));
-    ssrec.setFieldValue('custrecord_custdata_est_firmphone', nlapiGetFieldValue('custpage_attorney_phone'));
-    ssrec.setFieldValue('custrecord_custdata_est_firmemail', nlapiGetFieldValue('custpage_attorney_email'));
-    ssrec.setFieldValue('custrecord_custdata_est_attycontactid', nlapiGetFieldValue('custpage_attorney_id'));
-    ssrec.setFieldValue('custrecord_custdata_est_attyscore', nlapiGetFieldValue('custpage_attorney_rating'));
-    ssrec.setFieldValue('custrecord_custdata_est_attynotes', nlapiGetFieldValue('custpage_attorney_notes'));
-    ssrec.setFieldValue('custrecord_custdata_est_pr', nlapiGetFieldValue('custpage_personal_rep_1'));
-    ssrec.setFieldValue('custrecord_custdata_est_praddr', nlapiGetFieldValue('custpage_personal_rep_1_address'));
-    ssrec.setFieldValue('custrecord_custdata_est_prcity', nlapiGetFieldValue('custpage_personal_rep_1_city'));
-    ssrec.setFieldValue('custrecord_custdata_est_prstate', nlapiGetFieldText('custpage_personal_rep_1_state'));
-    ssrec.setFieldValue('custrecord_custdata_est_przipcode', nlapiGetFieldValue('custpage_personal_rep_1_zip'));
-    ssrec.setFieldValue('custrecord_custdata_est_prphone', nlapiGetFieldValue('custpage_personal_rep_1_phone'));
-    ssrec.setFieldValue('custrecord_custdata_est_premail', nlapiGetFieldValue('custpage_personal_rep_1_email'));
-    ssrec.setFieldValue('custrecord_custdata_est_prcontactid', nlapiGetFieldValue('custpage_personal_rep_1_id'));
-    ssrec.setFieldValue('custrecord_custdata_est_prrelationship', nlapiGetFieldText('custpage_personal_rep_1_relationship'));
-    ssrec.setFieldValue('custrecord_custdata_est_diligencerep', nlapiGetFieldValue('custpage_diligence_assignee'));
-    ssrec.setFieldValue('custrecord_custdata_est_totalpropval', nlapiGetFieldValue('custpage_total_property'));
-    ssrec.setFieldValue('custrecord_custdata_est_totalassets', nlapiGetFieldValue('custpage_total_assets'));
-    ssrec.setFieldValue('custrecord_custdata_est_totalclaims', nlapiGetFieldValue('custpage_total_claims'));
-    ssrec.setFieldValue('custrecord_custdata_est_heirbequests', nlapiGetFieldValue('custpage_specific_bequests'));
-    ssrec.setFieldValue('custrecord_custdata_est_closingcosts', nlapiGetFieldValue('custpage_closing_costs'));
-    ssrec.setFieldValue('custrecord_custdata_est_attyfees', nlapiGetFieldValue('custpage_attorney_fees'));
-    ssrec.setFieldValue('custrecord_custdata_est_netequityvalue', nlapiGetFieldValue('custpage_net_equity_value_1'));
-    ssrec.setFieldValue('custrecord_custdata_est_legalexpenses', nlapiGetFieldValue('custpage_net_legal_expenses'));
-    ssrec.setFieldValue('custrecord_custdata_est_netassetsinfo', nlapiGetFieldValue('custpage_netassets'));
-    ssrec.setFieldValue('custrecord_custdata_cust_netequity', nlapiGetFieldValue('custpage_net_equity_value'));
-    ssrec.setFieldValue('custrecord_custdata_cust_pctestatedue', nlapiGetFieldValue('custpage_percent_equity_due'));
-    ssrec.setFieldValue('custrecord_custdata_cust_heirship', nlapiGetFieldValue('custpage_heirship'));
-    ssrec.setFieldValue('custrecord_custdata_cust_estresiduedue', nlapiGetFieldValue('custpage_residue_equity_due'));
-    ssrec.setFieldValue('custrecord_custdata_cust_bequestdue', nlapiGetFieldValue('custpage_bequest_due'));
-    ssrec.setFieldValue('custrecord_custdata_cust_totalduefromest', nlapiGetFieldValue('custpage_total_due'));
-    ssrec.setFieldValue('custrecord_custdata_cust_liens', nlapiGetFieldValue('custpage_liens_judgments'));
-    ssrec.setFieldValue('custrecord_custdata_cust_existingassgn', nlapiGetFieldValue('custpage_existing_agreements'));
-    ssrec.setFieldValue('custrecord_custdata_cust_netduetocust', nlapiGetFieldValue('custpage_net_due'));
-    ssrec.setFieldValue('custrecord_custdata_cust_tenpercentsens', nlapiGetFieldValue('custpage_sensitivity_to_10percent'));
-    ssrec.setFieldValue('custrecord_custdata_cust_advtovalratio', nlapiGetFieldValue('custpage_adv_to_val_ratio'));
-    ssrec.setFieldValue('custrecord_custdata_cust_maxadvancesize', nlapiGetFieldValue('custpage_max_advance'));
-    ssrec.setFieldValue('custrecord_custdata_cust_expectedrebate', nlapiGetFieldValue('custpage_rebate'));
-    ssrec.setFieldValue('custrecord_custdata_cust_holdback', nlapiGetFieldValue('custpage_holdback'));
-    ssrec.setFieldValue('custrecord_custdata_cust_desiredadvsize', nlapiGetFieldValue('custpage_desired_advance'));
-    ssrec.setFieldValue('custrecord_custdata_cust_pricinglevel', nlapiGetFieldValue('custpage_price_level'));
-    ssrec.setFieldValue('custrecord_custdata_cust_estmonthsremain', nlapiGetFieldValue('custpage_months_remaining'));
-    ssrec.setFieldValue('custrecord_custdata_cust_rebateoption1', nlapiGetFieldValue('custpage_early_rebate_1'));
-    ssrec.setFieldValue('custrecord_custdata_cust_rebateoption2', nlapiGetFieldValue('custpage_early_rebate_2'));
-    ssrec.setFieldValue('custrecord_custdata_cust_rebateoption3', nlapiGetFieldValue('custpage_early_rebate_3'));
-    ssrec.setFieldValue('custrecord_custdata_cust_assignmentsize', nlapiGetFieldValue('custpage_assignment_size'));
-    ssrec.setFieldValue('custrecord_custdata_cust_option1pricing', nlapiGetFieldValue('custpage_early_rebate_1_amt'));
-    ssrec.setFieldValue('custrecord_custdata_cust_option2pricing', nlapiGetFieldValue('custpage_early_rebate_2_amt'));
-    ssrec.setFieldValue('custrecord_custdata_cust_option3pricing', nlapiGetFieldValue('custpage_early_rebate_3_amt'));
-    ssrec.setFieldValue('custrecord_custdata_cust_calculatedfee', nlapiGetFieldValue('custpage_calculated_fee'));
-    ssrec.setFieldValue('custrecord_custdata_cust_rateofreturn', nlapiGetFieldValue('custpage_rate_of_return'));
-    ssrec.setFieldValue('custrecord_custdata_jdict_county', nlapiGetFieldText('custpage_jurisdiction_county'));
-    ssrec.setFieldValue('custrecord_custdata_jdict_pleadingtitle', nlapiGetFieldValue('custpage_jurisdiction_pleading_title'));
-    ssrec.setFieldValue('custrecord_custdata_jdict_courtname', nlapiGetFieldValue('custpage_jurisdiction_court_name'));
-    ssrec.setFieldValue('custrecord_custdata_jdict_courtaddress', nlapiGetFieldValue('custpage_jurisdiction_court_address'));
-    ssrec.setFieldValue('custrecord_custdata_jdict_courtcity', nlapiGetFieldValue('custpage_jurisdiction_court_city'));
-    ssrec.setFieldValue('custrecord_custdata_jdict_courtstate', nlapiGetFieldValue('custpage_jurisdiction_court_state'));
-    ssrec.setFieldValue('custrecord_custdata_jdict_courtzipcode', nlapiGetFieldValue('custpage_jurisdiction_court_zip'));
-    ssrec.setFieldValue('custrecord_custdata_jdict_courtphone', nlapiGetFieldValue('custpage_jurisdiction_court_phone'));
-    ssrec.setFieldValue('custrecord_custdata_totalinvoices', nlapiGetFieldValue('custpage_invoices_total_assignments'));
-    if (!!options.documenttype && (options.documenttype == 'invoice' || options.documenttype == 'quote')) {
-      ssrec.setFieldValue('custrecord_custdata_transactionnum', options.documentid);
-    }
-    var quotecount = nlapiGetLineItemCount('custpage_prior_quotes');
-    console.log('quotecount', quotecount);
-    ssrec.setFieldValue('custrecord_custdata_quotecount', quotecount);
-  
-    console.log('processing checkboxes...');
-  
-    ssrec.setFieldValue('custrecord_custdata_cust_custinestate', nlapiGetFieldText('custpage_clientinestate'));
-    ssrec.setFieldValue('custrecord_custdata_est_dot', nlapiGetFieldValue('custpage_diligence_dot'));
-    ssrec.setFieldValue('custrecord_custdata_est_escrow', nlapiGetFieldValue('custpage_diligence_escrow'));
-    ssrec.setFieldValue('custrecord_custdata_est_blockedacctlette', nlapiGetFieldValue('custpage_diligence_blocked_account_letter'));
-    ssrec.setFieldValue('custrecord_custdata_est_problemcase', nlapiGetFieldValue('custpage_problem_case'));
-    ssrec.setFieldValue('custrecord_custdata_est_prinestate', nlapiGetFieldValue('custpage_prinestate'));
-    ssrec.setFieldValue('custrecord_custdata_est_clientinestate', nlapiGetFieldValue('custpage_clientinestate2'));
-    ssrec.setFieldValue('custrecord_custdata_est_heirsinestate', nlapiGetFieldValue('custpage_heirinestate'));
-    ssrec.setFieldValue('custrecord_custdata_est_3ptyinestate', nlapiGetFieldValue('custpage_thirdptyinestate'));
-  
-    console.log('processing sublists...');
-    console.log('properties sublist...');
-    var propertydata = '';
-    if (nlapiGetLineItemCount('custpage_properties') > 0) {
-      var csvdata = processSublist('custpage_properties');
-      if (!!csvdata && csvdata != -1)
-        ssrec.setFieldValue('custrecord_custdata_est_propertieslist', csvdata);
-      else
-        console.log('error processing properties sublist');
-      propertydata = csvdata;
-    }
-  
-    console.log('accounts sublist...');
-    if (nlapiGetLineItemCount('custpage_accounts') > 0) {
-      var csvdata = processSublist('custpage_accounts');
-      if (!!csvdata && csvdata != -1)
-        ssrec.setFieldValue('custrecord_custdata_est_assetslist', csvdata);
-      else
-        console.log('error processing accounts sublist');
-    }
-  
-    console.log('claims sublist...');
-    if (nlapiGetLineItemCount('custpage_claims') > 0) {
-      var csvdata = processSublist('custpage_claims');
-      if (!!csvdata && csvdata != -1)
-        ssrec.setFieldValue('custrecord_custdata_est_claimslist', csvdata);
-      else
-        console.log('error processing claims sublist');
-    }
-  
-    console.log('prior quotes sublist...');
-    if (nlapiGetLineItemCount('custpage_prior_quotes') > 0) {
-      var csvdata = processSublist('custpage_prior_quotes');
-      if (!!csvdata && csvdata != -1)
-        ssrec.setFieldValue('custrecord_custdata_cust_priorquoteslist', csvdata);
-      else
-        console.log('error processing claims sublist');
-    }
-  
-    console.log('case status list sublist...');
-    if (nlapiGetLineItemCount('custpage_case_status_list') > 0) {
-      var csvdata = processSublist('custpage_case_status_list');
-      if (!!csvdata && csvdata != -1)
-        ssrec.setFieldValue('custrecord_custdata_cust_casestatuslist', csvdata);
-      else
-        console.log('error processing case status sublist');
-    }
-  
-    console.log('past assignments sublist...');
-    if (nlapiGetLineItemCount('custpage_other_assignments') > 0) {
-      var csvdata = processSublist('custpage_other_assignments');
-      if (!!csvdata && csvdata != -1)
-        ssrec.setFieldValue('custrecord_custdata_cust_pastassignlist', csvdata);
-      else
-        console.log('error processing past assignments sublist');
-    }
-  
-    console.log('liens sublist...');
-    if (nlapiGetLineItemCount('custpage_leins_judgements_list') > 0) {
-      var csvdata = processSublist('custpage_leins_judgements_list');
-      if (!!csvdata && csvdata != -1)
-        ssrec.setFieldValue('custrecord_custdata_cust_lienslist', csvdata);
-      else
-        console.log('error processing liens sublist');
-    }
-  
-    console.log('case updates sublist...');
-    if (nlapiGetLineItemCount('custpage_phonecalls') > 0) {
-      var csvdata = processSublist('custpage_phonecalls');
-      if (!!csvdata && csvdata != -1)
-        ssrec.setFieldValue('custrecord_custdata_caseupdateslist', csvdata);
-      else
-        console.log('error processing case updates sublist');
-    }
-  
-    console.log('messages sublist...');
-    if (nlapiGetLineItemCount('custpage_messages') > 0) {
-      var csvdata = processSublist('custpage_messages');
-      if (!!csvdata && csvdata != -1)
-        ssrec.setFieldValue('custrecord_custdata_messageslist', csvdata);
-      else
-        console.log('error processing messages sublist');
-    }
-  
-    console.log('events sublist...');
-    if (nlapiGetLineItemCount('custpage_events') > 0) {
-      var csvdata = processSublist('custpage_events');
-      if (!!csvdata && csvdata != -1)
-        ssrec.setFieldValue('custrecord_custdata_eventslist', csvdata);
-      else
-        console.log('error processing events sublist');
-    }
-  
-    console.log('user notes sublist...');
-    if (nlapiGetLineItemCount('custpage_user_notes') > 0) {
-      var csvdata = processSublist('custpage_user_notes');
-      if (!!csvdata && csvdata != -1)
-        ssrec.setFieldValue('custrecord_custdata_usernoteslist', csvdata);
-      else
-        console.log('error processing user notes sublist');
-    }
-  
-    console.log('contacts sublist...');
-    if (nlapiGetLineItemCount('custpage_contacts') > 0) {
-      var csvdata = processSublist('custpage_contacts');
-      if (!!csvdata && csvdata != -1)
-        ssrec.setFieldValue('custrecord_custdata_contactslist', csvdata);
-      else
-        console.log('error processing contacts sublist');
-    }
-  
-    console.log('invoices sublist...');
-    if (nlapiGetLineItemCount('custpage_invoice_list') > 0) {
-      var csvdata = processSublist('custpage_invoice_list');
-      if (!!csvdata && csvdata != -1)
-        ssrec.setFieldValue('custrecord_custdata_invoiceslist', csvdata);
-      else
-        console.log('error processing invoices sublist');
-    }
-  
-    console.log('followups sublist...');
-    if (nlapiGetLineItemCount('custpage_followup_list') > 0) {
-      var csvdata = processSublist('custpage_followup_list');
-      if (!!csvdata && csvdata != -1)
-        ssrec.setFieldValue('custrecord_custdata_followuplist', csvdata);
-      else
-        console.log('error processing followups sublist');
-    }
-  
-    console.log('done with sublists.');
-    console.log('saving record...');
-    var snapshotid = nlapiSubmitRecord(ssrec);
-    console.log('done.');
-  
-    console.log('processing property subrecords...');
-  
-    var propertyarray = propertydata.trim().split('\n');
-    if (propertyarray.length > 1) {
-      for (var i = 1; i < propertyarray.length; i++) {
-        var line = propertyarray[i].replace(/\n/g, '');
-        var psfields = line.split('|');
-        var psrec = nlapiCreateRecord('customrecord_propertysnapshot');
-        psrec.setFieldValue('custrecord_propertysnapshot_parent', snapshotid);
-        psrec.setFieldValue('name', psfields[0]);
-        psrec.setFieldValue('custrecord_propertysnapshot_value', psfields[2]);
-        var addrdata = nlapiLookupField(
-            'customrecord_property',
-            psfields[18],
-            [
-              'custrecord_property_address',
-              'custrecord_property_city',
-              'custrecord_property_state',
-              'custrecord_property_zipcode'
-            ]
-        );
-        psrec.setFieldValue('custrecord_propertysnapshot_gcaddr', addrdata.custrecord_property_address);
-        psrec.setFieldValue('custrecord_propertysnapshot_gccity', addrdata.custrecord_property_city);
-        psrec.setFieldValue('custrecord_propertysnapshot_gcstate', addrdata.custrecord_property_state);
-        psrec.setFieldValue('custrecord_propertysnapshot_gczip', addrdata.custrecord_property_zipcode);
-        psrec.setFieldValue('custrecord_propertysnapshot_mortgage', psfields[3]);
-        psrec.setFieldValue('custrecord_propertysnapshot_pctowned', psfields[4]);
-        psrec.setFieldValue('custrecord_propertysnapshot_netvalue', psfields[5]);
-        psrec.setFieldValue('custrecord_propertysnapshot_dot', psfields[8]);
-        psrec.setFieldValue('custrecord_propertysnapshot_dot_subdate', psfields[9]);
-        psrec.setFieldValue('custrecord_propertysnapshot_dot_recdate', psfields[10]);
-        nlapiSubmitRecord(psrec);
-      }
-    }
-    console.log('snapshot complete.');
-  } catch(e) {
-    console.log(JSON.stringify(e));
+  console.log('begin snapshot...');
+  if (!!options && !!options.event)
+    var snapshotevent = options.event;
+  else
+    var snapshotevent = 'TEST';
+  var ssrec = nlapiCreateRecord('customrecord_custdata');
+  console.log('setting snapshot date');
+  var d = new Date();
+  var snapshotdate = (d.getMonth() + 1).toString().padStart(2, '0') + '/' + d.getDate().toString().padStart(2, '0') + '/' + d.getFullYear();
+  ssrec.setFieldValue('custrecord_custdata_snapshotdate', snapshotdate);
+  console.log('setting event type');
+  ssrec.setFieldValue('custrecord_custdata_eventtype', snapshotevent);
+
+  console.log('processing normal fields...');
+  ssrec.setFieldValue('custrecord_custdata_cust', nlapiGetFieldValue('custpage_customer_id'));
+  ssrec.setFieldValue('custrecord_custdata_cust_firstname', nlapiGetFieldValue('custpage_first_name'));
+  ssrec.setFieldValue('custrecord_custdata_cust_lastname', nlapiGetFieldValue('custpage_last_name'));
+  ssrec.setFieldValue('custrecord_custdata_cust_middlename', nlapiGetFieldValue('custpage_middle_initial'));
+  ssrec.setFieldValue('custrecord_custdata_cust_addr', nlapiGetFieldValue('custpage_address'));
+  ssrec.setFieldValue('custrecord_custdata_cust_city', nlapiGetFieldValue('custpage_city'));
+  ssrec.setFieldValue('custrecord_custdata_cust_state', nlapiGetFieldText('custpage_state'));
+  ssrec.setFieldValue('custrecord_custdata_cust_statewarning', nlapiGetFieldValue('custpage_state_warn'));
+  ssrec.setFieldValue('custrecord_custdata_cust_zipcode', nlapiGetFieldValue('custpage_zip'));
+  ssrec.setFieldValue('custrecord_custdata_cust_salesrep', nlapiGetFieldValue('custpage_sales_rep'));
+  ssrec.setFieldValue('custrecord_custdata_cust_phone', nlapiGetFieldValue('custpage_phone'));
+  ssrec.setFieldValue('custrecord_custdata_cust_email', nlapiGetFieldValue('custpage_email'));
+  ssrec.setFieldValue('custrecord_custdata_cust_leadsource', nlapiGetFieldText('custpage_how_did_they_find_us'));
+  ssrec.setFieldValue('custrecord_custdata_cust_laststatus', nlapiGetFieldText('custpage_latest_status'));
+  ssrec.setFieldValue('custrecord_custdata_cust_contactnotes', nlapiGetFieldValue('custpage_notes'));
+  ssrec.setFieldValue('custrecord_custdata_cust_followuptype', nlapiGetFieldValue('custpage_followup_type'));
+  ssrec.setFieldValue('custrecord_custdata_cust_laststatusnotes', nlapiGetFieldValue('custpage_latest_status_notes'));
+  ssrec.setFieldValue('custrecord_custdata_est_decedentexisting', nlapiGetFieldValue('custpage_estate'));
+  ssrec.setFieldValue('custrecord_custdata_est_decedentnew', nlapiGetFieldValue('custpage_decedent'));
+  ssrec.setFieldValue('custrecord_custdata_est_casefileno', nlapiGetFieldValue('custpage_case_no'));
+  ssrec.setFieldValue('custrecord_custdata_est_state', nlapiGetFieldText('custpage_estate_state'));
+  ssrec.setFieldValue('custrecord_custdata_est_statewarning', nlapiGetFieldValue('custpage_estate_state_warn'));
+  ssrec.setFieldValue('custrecord_custdata_est_county', nlapiGetFieldText('custpage_estate_county'));
+  ssrec.setFieldValue('custrecord_custdata_est_estdistdate', nlapiGetFieldValue('custpage_estate_est_date_distr'));
+  ssrec.setFieldValue('custrecord_custdata_est_filingdate', nlapiGetFieldValue('custpage_estate_filing_date'));
+  ssrec.setFieldValue('custrecord_custdata_est_nextevent', nlapiGetFieldValue('custpage_estate_next_event'));
+  ssrec.setFieldValue('custrecord_custdata_est_lastcalldate', nlapiGetFieldValue('custpage_estate_next_phonecall'));
+  ssrec.setFieldValue('custrecord_custdata_est_estatestatus', nlapiGetFieldText('custpage_est_status'));
+  ssrec.setFieldValue('custrecord_custdata_est_estatetype', nlapiGetFieldValue('custpage_estatetype'));
+  ssrec.setFieldValue('custrecord_custdata_est_acctsecurity', nlapiGetFieldValue('custpage_acctsecurity'));
+  ssrec.setFieldValue('custrecord_custdata_est_multiple', nlapiGetFieldValue('custpage_multipleestatestrusts'));
+  ssrec.setFieldValue('custrecord_custdata_est_supervisionlevel', nlapiGetFieldValue('custpage_supervisionlevel'));
+  ssrec.setFieldValue('custrecord_custdata_est_claimsperiodend', nlapiGetFieldValue('custpage_claimsperiodend'));
+  ssrec.setFieldValue('custrecord_custdata_est_attyname', nlapiGetFieldValue('custpage_attorney_name'));
+  ssrec.setFieldValue('custrecord_custdata_est_firmname', nlapiGetFieldValue('custpage_firm_name'));
+  ssrec.setFieldValue('custrecord_custdata_est_firmaddr', nlapiGetFieldValue('custpage_attorney_address'));
+  ssrec.setFieldValue('custrecord_custdata_est_firmcity', nlapiGetFieldValue('custpage_attorney_city'));
+  ssrec.setFieldValue('custrecord_custdata_est_firmstate', nlapiGetFieldText('custpage_attorney_state'));
+  ssrec.setFieldValue('custrecord_custdata_est_firmzipcode', nlapiGetFieldValue('custpage_attorney_zip'));
+  ssrec.setFieldValue('custrecord_custdata_est_firmphone', nlapiGetFieldValue('custpage_attorney_phone'));
+  ssrec.setFieldValue('custrecord_custdata_est_firmemail', nlapiGetFieldValue('custpage_attorney_email'));
+  ssrec.setFieldValue('custrecord_custdata_est_attycontactid', nlapiGetFieldValue('custpage_attorney_id'));
+  ssrec.setFieldValue('custrecord_custdata_est_attyscore', nlapiGetFieldValue('custpage_attorney_rating'));
+  ssrec.setFieldValue('custrecord_custdata_est_attynotes', nlapiGetFieldValue('custpage_attorney_notes'));
+  ssrec.setFieldValue('custrecord_custdata_est_pr', nlapiGetFieldValue('custpage_personal_rep_1'));
+  ssrec.setFieldValue('custrecord_custdata_est_praddr', nlapiGetFieldValue('custpage_personal_rep_1_address'));
+  ssrec.setFieldValue('custrecord_custdata_est_prcity', nlapiGetFieldValue('custpage_personal_rep_1_city'));
+  ssrec.setFieldValue('custrecord_custdata_est_prstate', nlapiGetFieldText('custpage_personal_rep_1_state'));
+  ssrec.setFieldValue('custrecord_custdata_est_przipcode', nlapiGetFieldValue('custpage_personal_rep_1_zip'));
+  ssrec.setFieldValue('custrecord_custdata_est_prphone', nlapiGetFieldValue('custpage_personal_rep_1_phone'));
+  ssrec.setFieldValue('custrecord_custdata_est_premail', nlapiGetFieldValue('custpage_personal_rep_1_email'));
+  ssrec.setFieldValue('custrecord_custdata_est_prcontactid', nlapiGetFieldValue('custpage_personal_rep_1_id'));
+  ssrec.setFieldValue('custrecord_custdata_est_prrelationship', nlapiGetFieldText('custpage_personal_rep_1_relationship'));
+  ssrec.setFieldValue('custrecord_custdata_est_diligencerep', nlapiGetFieldValue('custpage_diligence_assignee'));
+  ssrec.setFieldValue('custrecord_custdata_est_totalpropval', nlapiGetFieldValue('custpage_total_property'));
+  ssrec.setFieldValue('custrecord_custdata_est_totalassets', nlapiGetFieldValue('custpage_total_assets'));
+  ssrec.setFieldValue('custrecord_custdata_est_totalclaims', nlapiGetFieldValue('custpage_total_claims'));
+  ssrec.setFieldValue('custrecord_custdata_est_heirbequests', nlapiGetFieldValue('custpage_specific_bequests'));
+  ssrec.setFieldValue('custrecord_custdata_est_closingcosts', nlapiGetFieldValue('custpage_closing_costs'));
+  ssrec.setFieldValue('custrecord_custdata_est_attyfees', nlapiGetFieldValue('custpage_attorney_fees'));
+  ssrec.setFieldValue('custrecord_custdata_est_netequityvalue', nlapiGetFieldValue('custpage_net_equity_value_1'));
+  ssrec.setFieldValue('custrecord_custdata_est_legalexpenses', nlapiGetFieldValue('custpage_net_legal_expenses'));
+  ssrec.setFieldValue('custrecord_custdata_est_netassetsinfo', nlapiGetFieldValue('custpage_netassets'));
+  ssrec.setFieldValue('custrecord_custdata_cust_netequity', nlapiGetFieldValue('custpage_net_equity_value'));
+  ssrec.setFieldValue('custrecord_custdata_cust_pctestatedue', nlapiGetFieldValue('custpage_percent_equity_due'));
+  ssrec.setFieldValue('custrecord_custdata_cust_heirship', nlapiGetFieldValue('custpage_heirship'));
+  ssrec.setFieldValue('custrecord_custdata_cust_estresiduedue', nlapiGetFieldValue('custpage_residue_equity_due'));
+  ssrec.setFieldValue('custrecord_custdata_cust_bequestdue', nlapiGetFieldValue('custpage_bequest_due'));
+  ssrec.setFieldValue('custrecord_custdata_cust_totalduefromest', nlapiGetFieldValue('custpage_total_due'));
+  ssrec.setFieldValue('custrecord_custdata_cust_liens', nlapiGetFieldValue('custpage_liens_judgments'));
+  ssrec.setFieldValue('custrecord_custdata_cust_existingassgn', nlapiGetFieldValue('custpage_existing_agreements'));
+  ssrec.setFieldValue('custrecord_custdata_cust_netduetocust', nlapiGetFieldValue('custpage_net_due'));
+  ssrec.setFieldValue('custrecord_custdata_cust_tenpercentsens', nlapiGetFieldValue('custpage_sensitivity_to_10percent'));
+  ssrec.setFieldValue('custrecord_custdata_cust_advtovalratio', nlapiGetFieldValue('custpage_adv_to_val_ratio'));
+  ssrec.setFieldValue('custrecord_custdata_cust_maxadvancesize', nlapiGetFieldValue('custpage_max_advance'));
+  ssrec.setFieldValue('custrecord_custdata_cust_expectedrebate', nlapiGetFieldValue('custpage_rebate'));
+  ssrec.setFieldValue('custrecord_custdata_cust_holdback', nlapiGetFieldValue('custpage_holdback'));
+  ssrec.setFieldValue('custrecord_custdata_cust_desiredadvsize', nlapiGetFieldValue('custpage_desired_advance'));
+  ssrec.setFieldValue('custrecord_custdata_cust_pricinglevel', nlapiGetFieldValue('custpage_price_level'));
+  ssrec.setFieldValue('custrecord_custdata_cust_estmonthsremain', nlapiGetFieldValue('custpage_months_remaining'));
+  ssrec.setFieldValue('custrecord_custdata_cust_rebateoption1', nlapiGetFieldValue('custpage_early_rebate_1'));
+  ssrec.setFieldValue('custrecord_custdata_cust_rebateoption2', nlapiGetFieldValue('custpage_early_rebate_2'));
+  ssrec.setFieldValue('custrecord_custdata_cust_rebateoption3', nlapiGetFieldValue('custpage_early_rebate_3'));
+  ssrec.setFieldValue('custrecord_custdata_cust_assignmentsize', nlapiGetFieldValue('custpage_assignment_size'));
+  ssrec.setFieldValue('custrecord_custdata_cust_option1pricing', nlapiGetFieldValue('custpage_early_rebate_1_amt'));
+  ssrec.setFieldValue('custrecord_custdata_cust_option2pricing', nlapiGetFieldValue('custpage_early_rebate_2_amt'));
+  ssrec.setFieldValue('custrecord_custdata_cust_option3pricing', nlapiGetFieldValue('custpage_early_rebate_3_amt'));
+  ssrec.setFieldValue('custrecord_custdata_cust_calculatedfee', nlapiGetFieldValue('custpage_calculated_fee'));
+  ssrec.setFieldValue('custrecord_custdata_cust_rateofreturn', nlapiGetFieldValue('custpage_rate_of_return'));
+  ssrec.setFieldValue('custrecord_custdata_jdict_county', nlapiGetFieldText('custpage_jurisdiction_county'));
+  ssrec.setFieldValue('custrecord_custdata_jdict_pleadingtitle', nlapiGetFieldValue('custpage_jurisdiction_pleading_title'));
+  ssrec.setFieldValue('custrecord_custdata_jdict_courtname', nlapiGetFieldValue('custpage_jurisdiction_court_name'));
+  ssrec.setFieldValue('custrecord_custdata_jdict_courtaddress', nlapiGetFieldValue('custpage_jurisdiction_court_address'));
+  ssrec.setFieldValue('custrecord_custdata_jdict_courtcity', nlapiGetFieldValue('custpage_jurisdiction_court_city'));
+  ssrec.setFieldValue('custrecord_custdata_jdict_courtstate', nlapiGetFieldValue('custpage_jurisdiction_court_state'));
+  ssrec.setFieldValue('custrecord_custdata_jdict_courtzipcode', nlapiGetFieldValue('custpage_jurisdiction_court_zip'));
+  ssrec.setFieldValue('custrecord_custdata_jdict_courtphone', nlapiGetFieldValue('custpage_jurisdiction_court_phone'));
+  ssrec.setFieldValue('custrecord_custdata_totalinvoices', nlapiGetFieldValue('custpage_invoices_total_assignments'));
+  if (!!options.documenttype && (options.documenttype == 'invoice' || options.documenttype == 'quote')) {
+    ssrec.setFieldValue('custrecord_custdata_transactionnum', options.documentid);
   }
+  var quotecount = nlapiGetLineItemCount('custpage_prior_quotes');
+  console.log('quotecount', quotecount);
+  ssrec.setFieldValue('custrecord_custdata_quotecount', quotecount);
+
+  console.log('processing checkboxes...');
+
+  ssrec.setFieldValue('custrecord_custdata_cust_custinestate', nlapiGetFieldText('custpage_clientinestate'));
+  ssrec.setFieldValue('custrecord_custdata_est_dot', nlapiGetFieldValue('custpage_diligence_dot'));
+  ssrec.setFieldValue('custrecord_custdata_est_escrow', nlapiGetFieldValue('custpage_diligence_escrow'));
+  ssrec.setFieldValue('custrecord_custdata_est_blockedacctlette', nlapiGetFieldValue('custpage_diligence_blocked_account_letter'));
+  ssrec.setFieldValue('custrecord_custdata_est_problemcase', nlapiGetFieldValue('custpage_problem_case'));
+  ssrec.setFieldValue('custrecord_custdata_est_prinestate', nlapiGetFieldValue('custpage_prinestate'));
+  ssrec.setFieldValue('custrecord_custdata_est_clientinestate', nlapiGetFieldValue('custpage_clientinestate2'));
+  ssrec.setFieldValue('custrecord_custdata_est_heirsinestate', nlapiGetFieldValue('custpage_heirinestate'));
+  ssrec.setFieldValue('custrecord_custdata_est_3ptyinestate', nlapiGetFieldValue('custpage_thirdptyinestate'));
+
+  console.log('processing sublists...');
+  console.log('properties sublist...');
+  var propertydata = '';
+  if (nlapiGetLineItemCount('custpage_properties') > 0) {
+    var csvdata = processSublist('custpage_properties');
+    if (!!csvdata && csvdata != -1)
+      ssrec.setFieldValue('custrecord_custdata_est_propertieslist', csvdata);
+    else
+      console.log('error processing properties sublist');
+    propertydata = csvdata;
+  }
+
+  console.log('accounts sublist...');
+  if (nlapiGetLineItemCount('custpage_accounts') > 0) {
+    var csvdata = processSublist('custpage_accounts');
+    if (!!csvdata && csvdata != -1)
+      ssrec.setFieldValue('custrecord_custdata_est_assetslist', csvdata);
+    else
+      console.log('error processing accounts sublist');
+  }
+
+  console.log('claims sublist...');
+  if (nlapiGetLineItemCount('custpage_claims') > 0) {
+    var csvdata = processSublist('custpage_claims');
+    if (!!csvdata && csvdata != -1)
+      ssrec.setFieldValue('custrecord_custdata_est_claimslist', csvdata);
+    else
+      console.log('error processing claims sublist');
+  }
+
+  console.log('prior quotes sublist...');
+  if (nlapiGetLineItemCount('custpage_prior_quotes') > 0) {
+    var csvdata = processSublist('custpage_prior_quotes');
+    if (!!csvdata && csvdata != -1)
+      ssrec.setFieldValue('custrecord_custdata_cust_priorquoteslist', csvdata);
+    else
+      console.log('error processing claims sublist');
+  }
+
+  console.log('case status list sublist...');
+  if (nlapiGetLineItemCount('custpage_case_status_list') > 0) {
+    var csvdata = processSublist('custpage_case_status_list');
+    if (!!csvdata && csvdata != -1)
+      ssrec.setFieldValue('custrecord_custdata_cust_casestatuslist', csvdata);
+    else
+      console.log('error processing case status sublist');
+  }
+
+  console.log('past assignments sublist...');
+  if (nlapiGetLineItemCount('custpage_other_assignments') > 0) {
+    var csvdata = processSublist('custpage_other_assignments');
+    if (!!csvdata && csvdata != -1)
+      ssrec.setFieldValue('custrecord_custdata_cust_pastassignlist', csvdata);
+    else
+      console.log('error processing past assignments sublist');
+  }
+
+  console.log('liens sublist...');
+  if (nlapiGetLineItemCount('custpage_leins_judgements_list') > 0) {
+    var csvdata = processSublist('custpage_leins_judgements_list');
+    if (!!csvdata && csvdata != -1)
+      ssrec.setFieldValue('custrecord_custdata_cust_lienslist', csvdata);
+    else
+      console.log('error processing liens sublist');
+  }
+
+  console.log('case updates sublist...');
+  if (nlapiGetLineItemCount('custpage_phonecalls') > 0) {
+    var csvdata = processSublist('custpage_phonecalls');
+    if (!!csvdata && csvdata != -1)
+      ssrec.setFieldValue('custrecord_custdata_caseupdateslist', csvdata);
+    else
+      console.log('error processing case updates sublist');
+  }
+
+  console.log('messages sublist...');
+  if (nlapiGetLineItemCount('custpage_messages') > 0) {
+    var csvdata = processSublist('custpage_messages');
+    if (!!csvdata && csvdata != -1)
+      ssrec.setFieldValue('custrecord_custdata_messageslist', csvdata);
+    else
+      console.log('error processing messages sublist');
+  }
+
+  console.log('events sublist...');
+  if (nlapiGetLineItemCount('custpage_events') > 0) {
+    var csvdata = processSublist('custpage_events');
+    if (!!csvdata && csvdata != -1)
+      ssrec.setFieldValue('custrecord_custdata_eventslist', csvdata);
+    else
+      console.log('error processing events sublist');
+  }
+
+  console.log('user notes sublist...');
+  if (nlapiGetLineItemCount('custpage_user_notes') > 0) {
+    var csvdata = processSublist('custpage_user_notes');
+    if (!!csvdata && csvdata != -1)
+      ssrec.setFieldValue('custrecord_custdata_usernoteslist', csvdata);
+    else
+      console.log('error processing user notes sublist');
+  }
+
+  console.log('contacts sublist...');
+  if (nlapiGetLineItemCount('custpage_contacts') > 0) {
+    var csvdata = processSublist('custpage_contacts');
+    if (!!csvdata && csvdata != -1)
+      ssrec.setFieldValue('custrecord_custdata_contactslist', csvdata);
+    else
+      console.log('error processing contacts sublist');
+  }
+
+  console.log('invoices sublist...');
+  if (nlapiGetLineItemCount('custpage_invoice_list') > 0) {
+    var csvdata = processSublist('custpage_invoice_list');
+    if (!!csvdata && csvdata != -1)
+      ssrec.setFieldValue('custrecord_custdata_invoiceslist', csvdata);
+    else
+      console.log('error processing invoices sublist');
+  }
+
+  console.log('followups sublist...');
+  if (nlapiGetLineItemCount('custpage_followup_list') > 0) {
+    var csvdata = processSublist('custpage_followup_list');
+    if (!!csvdata && csvdata != -1)
+      ssrec.setFieldValue('custrecord_custdata_followuplist', csvdata);
+    else
+      console.log('error processing followups sublist');
+  }
+
+  console.log('done with sublists.');
+  console.log('saving record...');
+  var snapshotid = nlapiSubmitRecord(ssrec);
+  console.log('done.');
+
+  console.log('processing property subrecords...');
+//  if(userid=='2299863') {
+//    debugger;
+//  }
+  var propertyarray = propertydata.trim().split('\n');
+  if (propertyarray.length > 1) {
+    for (var i = 1; i < propertyarray.length; i++) {
+      var line = propertyarray[i].replace(/\n/g, '');
+      var psfields = line.split('|');
+      var psrec = nlapiCreateRecord('customrecord_propertysnapshot');
+      psrec.setFieldValue('custrecord_propertysnapshot_parent', snapshotid);
+      psrec.setFieldValue('name', psfields[0]);
+      psrec.setFieldValue('custrecord_propertysnapshot_value', psfields[2]);
+      var addrdata = nlapiLookupField(
+          'customrecord_property',
+          psfields[16],
+          [
+            'custrecord_property_address',
+            'custrecord_property_city',
+            'custrecord_property_state',
+            'custrecord_property_zipcode'
+          ]
+      );
+      psrec.setFieldValue('custrecord_propertysnapshot_gcaddr', addrdata.custrecord_property_address);
+      psrec.setFieldValue('custrecord_propertysnapshot_gccity', addrdata.custrecord_property_city);
+      psrec.setFieldValue('custrecord_propertysnapshot_gcstate', addrdata.custrecord_property_state);
+      psrec.setFieldValue('custrecord_propertysnapshot_gczip', addrdata.custrecord_property_zipcode);
+      psrec.setFieldValue('custrecord_propertysnapshot_mortgage', psfields[3]);
+      psrec.setFieldValue('custrecord_propertysnapshot_pctowned', psfields[4]);
+      psrec.setFieldValue('custrecord_propertysnapshot_netvalue', psfields[5]);
+      psrec.setFieldValue('custrecord_propertysnapshot_dot', psfields[8]);
+      psrec.setFieldValue('custrecord_propertysnapshot_dot_subdate', psfields[9]);
+      psrec.setFieldValue('custrecord_propertysnapshot_dot_recdate', psfields[10]);
+      nlapiSubmitRecord(psrec);
+    }
+  }
+  console.log('snapshot complete.');
 }
 
 function processSublist(list) {
@@ -3223,8 +3240,6 @@ function getSublistFields(list) {
         'custpage_property_dot',
         'custpage_property_dot_subdate',
         'custpage_property_dot_recdate',
-        'custpage_property_lispendens',
-        'custpage_property_moi',
         'custpage_property_note',
         'custpage_property_estamount',
         'custpage_property_preforeclosure_status',
@@ -3601,9 +3616,9 @@ function saveall() {
   var d=new Date();
   var starttime=parseFloat(d.getSeconds()+'.'+d.getMilliseconds());
   var userid=nlapiGetUser();
-  if(userid=='2299863') {
+//  if(userid!='2299863') {
     takeSnapshot({event:'RECORD SAVE'});
-  }
+//  }
   var fieldobj=getUpdateFields();
   var estupdatefields=[];
   var estupdatevalues=[];
@@ -3637,12 +3652,10 @@ function saveall() {
     if(fld.type=='estate') {
       estupdatefields.push(target);
       estupdatevalues.push(val);
-      console.log('estate', i, target, val);
     }
     if(fld.type=='customer') {
       custupdatefields.push(target);
       custupdatevalues.push(val);
-      console.log('customer', i, target, val);
     }
   }
   if(customerId) {
@@ -3650,7 +3663,6 @@ function saveall() {
     nlapiSubmitField("customer", customerId, custupdatefields, custupdatevalues);
     console.log("updated customer",customerId);
   }
-
   if(estateId){
     console.log(estupdatefields,estupdatevalues);
     nlapiSubmitField("customer", estateId, estupdatefields, estupdatevalues);
@@ -3880,4 +3892,13 @@ function getcasefilelink(casenum, countyval) {
       retval="More than one match - need further investigation";
   }
   return retval;
+}
+
+function searchbuttonclick() {
+  nlOpenWindow('/app/site/hosting/scriptlet.nl?script=2622&deploy=1', '_blank','height=550,width=1000');
+//  nlOpenWindow('/app/common/entity/contact.nl?id='+getSelectValue(getFormElementViaFormName('main_form', 'custpage_attorney_id'))+'', '_blank','height=450,width=450');
+//  var request=nlapiRequestURL("/app/site/hosting/restlet.nl?script=2621&deploy=1", null, null, null, "GET");
+//  var data=JSON.parse(request.body);
+//  console.log(request.body);
+  return true;
 }
