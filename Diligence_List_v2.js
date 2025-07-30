@@ -58,7 +58,15 @@ function Diligence_List(request,response)
 
 		fld = list.addField("custpage_dot", "text", "DOT");
 		fld = list.addField("custpage_escrow", "text", "Escrow");
+<<<<<<< HEAD
 		fld = list.addField("custpage_blocked_account", "text", "BLOCKED ACCOUNT LETTER");
+=======
+		fld = list.addField("custpage_lispendens", "text", "Lis Pendens");
+		fld = list.addField("custpage_moi", "text", "MOI");
+		fld = list.addField("custpage_blocked_account", "text", "BLOCKED ACCOUNT LETTER");
+		fld = list.addField("custpage_signed_blocked_account", "text", "Signed Blocked Account");
+		fld = list.addField("custpage_obtained_blocked_account", "text", "Obtained Blocked Account");
+>>>>>>> 88d5bac (resynchronize)
 		fld = list.addField("custpage_problem_case", "text", "PROBLEM CASE");
 //	fld = list.addField("custpage_expected_rebate", "text", "EXPECTED REBATE");
 		fld = list.addField("custpage_last_phone_message_author", "text", "Last Message Author");
@@ -171,7 +179,15 @@ function Diligence_List(request,response)
 
 							////// comment if you need child customer values
 							"blocked_account":"F",
+<<<<<<< HEAD
 							"problem_case":"F",
+=======
+							"blocked_account_signed":"F",
+							"blocked_account_obtained":"F",
+							"problem_case":"F",
+							"lispendens":"F",
+							"moi":"F",
+>>>>>>> 88d5bac (resynchronize)
 							"dot":"F",
 							"escrow":"F"
 						});
@@ -270,7 +286,15 @@ function Diligence_List(request,response)
 			cols.push(new nlobjSearchColumn("custentity_est_date_of_distribution"));
 			cols.push(new nlobjSearchColumn("custentity_est_status"));
 			cols.push(new nlobjSearchColumn("custentity_blocked_account_letter"));
+<<<<<<< HEAD
 			cols.push(new nlobjSearchColumn("custentity_problem_case"));
+=======
+			cols.push(new nlobjSearchColumn("custentity_client_signed_blocked_account"));
+			cols.push(new nlobjSearchColumn("custentity_courtapproved_blocked_account"));
+			cols.push(new nlobjSearchColumn("custentity_problem_case"));
+			cols.push(new nlobjSearchColumn("custentity_lispendens"));
+			cols.push(new nlobjSearchColumn("custentity_moi"));
+>>>>>>> 88d5bac (resynchronize)
 			cols.push(new nlobjSearchColumn("custentity_dot"));
 			cols.push(new nlobjSearchColumn("custentity_escrow"));
 			cols.push(new nlobjSearchColumn("custrecord_county_court_url","CUSTENTITY2",null));
@@ -297,10 +321,32 @@ function Diligence_List(request,response)
 							{
 								data[i].blocked_account=results[x].getValue("custentity_blocked_account_letter");
 							}
+<<<<<<< HEAD
+=======
+							if(data[i].blocked_account_signed=='F')
+							{
+								data[i].blocked_account_signed=results[x].getValue("custentity_client_signed_blocked_account");
+							}
+							if(data[i].blocked_account_obtained=='F')
+							{
+								data[i].blocked_account_obtained=results[x].getValue("custentity_courtapproved_blocked_account");
+							}
+>>>>>>> 88d5bac (resynchronize)
 							if(data[i].problem_case=='F')
 							{
 								data[i].problem_case=results[x].getValue("custentity_problem_case");
 							}
+<<<<<<< HEAD
+=======
+							if(data[i].lispendens=='F')
+							{
+								data[i].lispendens=results[x].getValue("custentity_lispendens");
+							}
+							if(data[i].moi=='F')
+							{
+								data[i].moi=results[x].getValue("custentity_moi");
+							}
+>>>>>>> 88d5bac (resynchronize)
 							if(data[i].dot=='F')
 							{
 								data[i].dot=results[x].getValue("custentity_dot");
@@ -380,6 +426,10 @@ function Diligence_List(request,response)
 		var createPDFURL = nlapiResolveURL('SUITELET', 'customscript_sl_stamped_assignment', 'customdeploy_sl_stamped_assignment', false);
 		//pass the internal id of the current record
 
+<<<<<<< HEAD
+=======
+      nlapiLogExecution('debug', 'data[0]', JSON.stringify(data[0]));
+>>>>>>> 88d5bac (resynchronize)
 		for(var x=0; x < data.length; x++)
 		{
 			var pdfURL=createPDFURL+'&invoices='+ data[x].invoice_id ;
@@ -393,7 +443,12 @@ function Diligence_List(request,response)
 
 			sublistData.push({
 				custpage_decedent_name_text:data[x].decedent_name,
+<<<<<<< HEAD
 				custpage_decedent_name : "<a href='/app/site/hosting/scriptlet.nl?script=180&deploy=1&compid=5295340&estate=" + data[x].estateId + "&native=T' target='_blank'>" + data[x].decedent_name + "</a>",
+=======
+				custpage_decedent_name : "<a href='/app/site/hosting/scriptlet.nl?script=180&deploy=1&estate=" + data[x].estateId + "&native=T' target='_blank'>" + data[x].decedent_name + "</a>",
+//				custpage_decedent_name : "<a href='/app/site/hosting/scriptlet.nl?script=180&deploy=1&compid=5295340&estate=" + data[x].estateId + "&native=T' target='_blank'>" + data[x].decedent_name + "</a>",
+>>>>>>> 88d5bac (resynchronize)
 				custpage_county : data[x].county,
 				custpage_invoice_list_text:data[x].invoice_link_text,
 				//custpage_invoice_list : data[x].invoice_link,
@@ -408,7 +463,15 @@ function Diligence_List(request,response)
 				custpage_est_date_of_distr : data[x].est_date_of_distr,
 				custpage_estate_status_part : data[x].estate_status_part,
 				custpage_blocked_account : data[x].blocked_account=='T' ? "Yes" :"No",
+<<<<<<< HEAD
 				custpage_problem_case : data[x].problem_case=='T' ? "Yes" :"No",
+=======
+				custpage_signed_blocked_account : data[x].blocked_account_signed=='T' ? "Yes" :"No",
+				custpage_obtained_blocked_account : data[x].blocked_account_obtained=='T' ? "Yes" :"No",
+				custpage_problem_case : data[x].problem_case=='T' ? "Yes" :"No",
+				custpage_lispendens : data[x].lispendens=='T' ? "Yes" :"No",
+				custpage_moi : data[x].moi=='T' ? "Yes" :"No",
+>>>>>>> 88d5bac (resynchronize)
 				custpage_dot:data[x].dot=='T' ? "Yes" :"No",
 				custpage_escrow:data[x].escrow=='T' ? "Yes" :"No",
 				custpage_stamped_assignment : "<a href="+pdfURL+" target='top'>Print</a>",
