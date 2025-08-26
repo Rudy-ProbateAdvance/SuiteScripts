@@ -94,7 +94,7 @@ function New_Customer_Application(request, response) {
 
         form.setScript("customscript_new_cust_app_cs");
         form.addButton('custpage_savebutton', 'Save', 'savebuttonclick();');
-        form.addButton('custpage_searchbutton', 'Search Mailer Data', 'searchbuttonclick();');
+//        form.addButton('custpage_searchbutton', 'Search Lead Data', 'searchbuttonclick();');
 //        form.addButton('auto_so_if_btn', 'Print Shipping Label', 'onAutoSoIfBtnClick(' + request.getParameter("customer") + ')');
 
         var fld;
@@ -165,9 +165,6 @@ function New_Customer_Application(request, response) {
         fld = form.addField("custpage_last_name", "text", "Last Name", null, "customer");
         if (customer != null)
           fld.setDefaultValue(customer.getFieldValue("lastname"));
-        fld = form.addField("custpage_unsubscribe", "text", "Customer Code", null, "customer");
-        if (customer != null)
-          fld.setDefaultValue(customer.getFieldValue("custentity_unsubscribe"));
 
         fld = form.addField("custpage_address", "text", "Address", null, "customer");
         fld.setLayoutType("normal", "startcol");
@@ -699,13 +696,6 @@ function New_Customer_Application(request, response) {
 // RM 20240122 END
 
         var properties = form.addSubList("custpage_properties", "inlineeditor", "Real Properties", "financials");//inlineeditor//list
-
-/*******************************************************************************************
- *******************************************************************************************
- *** If field headers change, they have to be updated in Client Script Snapshot function ***
- *******************************************************************************************
- *******************************************************************************************/
-        
         fld = properties.addField("custpage_property_address", "textarea", "Property");
         fld.setDisplayType("entry");
         fld.setDisplaySize("200", "6");
@@ -730,13 +720,6 @@ function New_Customer_Application(request, response) {
         fld = properties.addField("custpage_property_moi", "checkbox", "MOI");
         fld = properties.addField("custpage_property_note", "textarea", "Note");
         fld.setDisplayType("entry");
-
-/*******************************************************************************************
- *******************************************************************************************
- *** If field headers change, they have to be updated in Client Script Snapshot function ***
- *******************************************************************************************
- *******************************************************************************************/
-        
         fld = properties.addField("custpage_property_estamount", "integer", "ESTIMATED Value");
         fld.setDisplayType("disabled");
         fld = properties.addField("custpage_property_preforeclosure_status", "select", "Preforeclosure Status", "customlist_preforeclosure_status");
@@ -760,13 +743,6 @@ function New_Customer_Application(request, response) {
         fld = properties.addField("custpage_property_attomerror", "text", "Data pull ERROR");
         fld.setDisplayType("hidden");
         fld = properties.addField("custpage_property_num", "select", "Property Record", "customrecord_property");//text
-
-/*******************************************************************************************
- *******************************************************************************************
- *** If field headers change, they have to be updated in Client Script Snapshot function ***
- *******************************************************************************************
- *******************************************************************************************/
-        
 
 
         //fld =properties.addField("custpage_property_listingtype", "text", "LISTING TYPE (SWAGGER)");

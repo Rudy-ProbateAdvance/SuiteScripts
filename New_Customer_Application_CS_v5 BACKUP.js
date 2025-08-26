@@ -115,21 +115,19 @@ function New_Cust_App_CS_FC(type, name, linenum) {
     return;
   }
 
-  if(nlapiGetUser()!=2299863) {
-    if(navigator.userActivation.hasBeenActive) {
-      if (window.inactivitytimerid) {
-        window.clearTimeout(window.inactivitytimerid);
-        window.inactivitytimerid = null;
-        delete window.inactivitytimerid;
-      }
-      window.inactivitytimerid = window.setTimeout(function () {
-  //      alert('inactivity timer: ' + window.inactivitytimerid);
-  //      saveall();
-        savebuttonclick();
-      }, 300000);
-    } else {
-      window.ischanged=false;
+  if(navigator.userActivation.hasBeenActive) {
+    if (window.inactivitytimerid) {
+      window.clearTimeout(window.inactivitytimerid);
+      window.inactivitytimerid = null;
+      delete window.inactivitytimerid;
     }
+    window.inactivitytimerid = window.setTimeout(function () {
+//      alert('inactivity timer: ' + window.inactivitytimerid);
+//      saveall();
+      savebuttonclick();
+    }, 900000);
+  } else {
+    window.ischanged=false;
   }
 
   try {
@@ -380,9 +378,9 @@ function New_Cust_App_CS_FC(type, name, linenum) {
           nlapiSetFieldValue("custpage_customer_id", customerId, false, true);
         }
       } else {
-//        if(nlapiGetUser()=='2299863') {
+        if(nlapiGetUser()=='2299863') {
 //          alert('has customerId');
-//        }
+        }
         if (name == "custpage_first_name" || name == "custpage_diligence_assignee" || name == "custpage_middle_initial" || name == "custpage_last_name" || name == "custpage_phone" || name == "custpage_email" || name == "custpage_how_did_they_find_us" || name == "custpage_alt_phone") {
           switch (name) {
 //            case "custpage_first_name":
@@ -559,11 +557,9 @@ function New_Cust_App_CS_FC(type, name, linenum) {
       }
 
       if(name == "custpage_case_no") {
-        debugger;
         casenum=nlapiGetFieldValue("custpage_case_no");
         county=nlapiGetFieldValue("custpage_estate_county");
-        if(county!='' && county!=null)
-          nlapiSetFieldValue("custpage_casefilelink", getcasefilelink(casenum, county));
+        nlapiSetFieldValue("custpage_casefilelink", getcasefilelink(casenum, county));
       }
 
       if (name == "custpage_estate_state")
@@ -3155,25 +3151,21 @@ function takeSnapshot(options) { //takeSnapshot({event:'INVOICE', documenttype:'
   console.log('done.');
 
   console.log('processing property subrecords...');
-//  if(userid!='2299863') {
+//  if(userid=='2299863') {
 //    debugger;
 //  }
   var propertyarray = propertydata.trim().split('\n');
   if (propertyarray.length > 1) {
-    var headers=propertyarray[0].split('|');
     for (var i = 1; i < propertyarray.length; i++) {
       var line = propertyarray[i].replace(/\n/g, '');
       var psfields = line.split('|');
       var psrec = nlapiCreateRecord('customrecord_propertysnapshot');
       psrec.setFieldValue('custrecord_propertysnapshot_parent', snapshotid);
-//      psrec.setFieldValue('name', psfields[0]);
-      psrec.setFieldValue('name', psfields[headers.indexOf('Property')]);
-//      psrec.setFieldValue('custrecord_propertysnapshot_value', psfields[2]);
-      psrec.setFieldValue('custrecord_propertysnapshot_value', psfields[headers.indexOf('Value')]);
+      psrec.setFieldValue('name', psfields[0]);
+      psrec.setFieldValue('custrecord_propertysnapshot_value', psfields[2]);
       var addrdata = nlapiLookupField(
           'customrecord_property',
-//          psfields[16],
-          psfields[headers.indexOf('Property ID')],
+          psfields[16],
           [
             'custrecord_property_address',
             'custrecord_property_city',
@@ -3185,18 +3177,12 @@ function takeSnapshot(options) { //takeSnapshot({event:'INVOICE', documenttype:'
       psrec.setFieldValue('custrecord_propertysnapshot_gccity', addrdata.custrecord_property_city);
       psrec.setFieldValue('custrecord_propertysnapshot_gcstate', addrdata.custrecord_property_state);
       psrec.setFieldValue('custrecord_propertysnapshot_gczip', addrdata.custrecord_property_zipcode);
-//      psrec.setFieldValue('custrecord_propertysnapshot_mortgage', psfields[3]);
-      psrec.setFieldValue('custrecord_propertysnapshot_mortgage', psfields[headers.indexOf('Mortgage')]);
-//      psrec.setFieldValue('custrecord_propertysnapshot_pctowned', psfields[4]);
-      psrec.setFieldValue('custrecord_propertysnapshot_pctowned', psfields[headers.indexOf('% Owned')]);
-//      psrec.setFieldValue('custrecord_propertysnapshot_netvalue', psfields[5]);
-      psrec.setFieldValue('custrecord_propertysnapshot_netvalue', psfields[headers.indexOf('Total (net value)')]);
-//      psrec.setFieldValue('custrecord_propertysnapshot_dot', psfields[8]);
-      psrec.setFieldValue('custrecord_propertysnapshot_dot', psfields[headers.indexOf('DOT')]);
-//      psrec.setFieldValue('custrecord_propertysnapshot_dot_subdate', psfields[9]);
-      psrec.setFieldValue('custrecord_propertysnapshot_dot_subdate', psfields[headers.indexOf('DOT Submission Date')]);
-//      psrec.setFieldValue('custrecord_propertysnapshot_dot_recdate', psfields[10]);
-      psrec.setFieldValue('custrecord_propertysnapshot_dot_recdate', psfields[headers.indexOf('DOT Recording Date')]);
+      psrec.setFieldValue('custrecord_propertysnapshot_mortgage', psfields[3]);
+      psrec.setFieldValue('custrecord_propertysnapshot_pctowned', psfields[4]);
+      psrec.setFieldValue('custrecord_propertysnapshot_netvalue', psfields[5]);
+      psrec.setFieldValue('custrecord_propertysnapshot_dot', psfields[8]);
+      psrec.setFieldValue('custrecord_propertysnapshot_dot_subdate', psfields[9]);
+      psrec.setFieldValue('custrecord_propertysnapshot_dot_recdate', psfields[10]);
       nlapiSubmitRecord(psrec);
     }
   }
@@ -3709,7 +3695,6 @@ function getUpdateFields() {
     "custpage_first_name":{"target":"firstname","type":"customer","label":"First Name"},
     "custpage_middle_initial":{"target":"middlename","type":"customer","label":"MI"},
     "custpage_last_name":{"target":"lastname","type":"customer","label":"Last Name"},
-    "custpage_unsubscribe":{"target":"custentity_unsubscribe","type":"customer","label":"Unsubscribe Code"},
     "custpage_alt_phone":{"target":"altphone","type":"customer","label":"Alternate Phone Number"},
     "custpage_diligence_assignee":{"target":"custentity_diligence_assignee","type":"customer","label":"Diligence Assignee","inactivecheck":true},
     "custpage_phone":{"target":"phone","type":"customer","label":"Phone Number"},
@@ -3805,10 +3790,9 @@ function stateToAbbrev(statename) {
     'md':'Maryland',
     'massachusetts':'MA',
     'ma':'Massachusetts',
-    'michigan':'MI',
-    'mi':'Michigan',
+    'missouri':'MI',
+    'mi':'Missouri',
     'minnesota':'MN',
-    
     'mn':'Minnesota',
     'mississippi':'MS',
     'ms':'Mississippi',
@@ -3911,12 +3895,7 @@ function getcasefilelink(casenum, countyval) {
 }
 
 function searchbuttonclick() {
-  var estate_state=nlapiGetFieldText('custpage_estate_state');
-  var estate_county=nlapiGetFieldText('custpage_estate_county');
-  var estate_casenum=nlapiGetFieldValue('custpage_case_no');
-  var customer_unsubscribe=nlapiGetFieldValue('custpage_unsubscribe');
-  var params='&state='+estate_state+'&county='+estate_county+'&casenum='+estate_casenum+'&unsubscribe='+customer_unsubscribe;
-  nlOpenWindow('/app/site/hosting/scriptlet.nl?script=2622&deploy=1'+params, '_blank','height=550,width=1000,toolbar=yes');
+  nlOpenWindow('/app/site/hosting/scriptlet.nl?script=2622&deploy=1', '_blank','height=550,width=1000');
 //  nlOpenWindow('/app/common/entity/contact.nl?id='+getSelectValue(getFormElementViaFormName('main_form', 'custpage_attorney_id'))+'', '_blank','height=450,width=450');
 //  var request=nlapiRequestURL("/app/site/hosting/restlet.nl?script=2621&deploy=1", null, null, null, "GET");
 //  var data=JSON.parse(request.body);
