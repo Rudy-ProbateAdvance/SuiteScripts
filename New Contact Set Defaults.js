@@ -9,7 +9,7 @@ define(['N/redirect', 'N/record'], function(redirect, record){
       var recordid=context.request.parameters.id;
       var mode=context.type;
       if(mode=='view') {
-        redirect.toRecord({id:recordid, type:'contact', isEditMode:true});
+//        redirect.toRecord({id:recordid, type:'contact', isEditMode:true});
       }
     } catch(e) {
       log.debug(e.message)

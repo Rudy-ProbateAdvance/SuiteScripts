@@ -5,16 +5,19 @@
 define(['N/record', 'N/search', 'N/query', 'N/runtime', 'N/https', 'N/currentRecord'], function(record, search, query, runtime, https, cr) {
 
   function fieldChanged(context) {
+    window.ischanged=false;
 //    alert('function:fieldChanged; sublist:'+context.sublistId+'; field:'+context.fieldId)
 	  return true;
   }
 
   function lineInit(context) {
+    window.ischanged=false;
 //    alert('function:lineInit; sublist:'+context.sublistId+'; field:'+context.fieldId)
 	  return true;
   }
 
   function pageInit(context) {
+    window.ischanged=false;
     try {
       document.getElementsByClassName('uir-machine-row-focused')[0].style.display='none';
       document.getElementsByClassName('uir-machine-button-row')[0].style.display='none'
@@ -30,7 +33,7 @@ define(['N/record', 'N/search', 'N/query', 'N/runtime', 'N/https', 'N/currentRec
     window.ischanged=false;
 //    debugger;
     var rec=cr.get();
-    var url='https://5295340-sb1.app.netsuite.com/app/site/hosting/restlet.nl?script=2621&deploy=1';
+    var url='https://5295340.app.netsuite.com/app/site/hosting/restlet.nl?script=2621&deploy=1';
     var unsubscribe=rec.getValue('custpage_unsubscribe');
     var casenum=rec.getValue('custpage_casenum');
     var county=rec.getValue('custpage_county');

@@ -72,8 +72,32 @@ Invoice must exist and must be open.`;
       var lines = filecontents.trim().replace(/\r/g, '').split(/\n/);
       var headers = lines[0];
       var temp = lines[0].split(',');
-      if (temp.length != 4 || temp[0] != 'GroupName' || temp[1] != 'PurchaseDate' || temp[2] != 'Multiple' || temp[3] != 'AssetID') {
+      log.debug(JSON.stringify(temp));
+      var format=true;
+      var errmsg='';
+      if (temp.length != 4) {
+        format=false;
+        errmsg+='columns:'+temp.length+'\n';
+      }
+      if(temp[0].replace(/"/g, '').trim().toLowerCase() != 'groupname') {
+        format=false;
+        errmsg+='column 1 name:"'+temp[0]+'" does not match "GroupName"\n';
+      }
+      if(temp[1].replace(/"/g, '').trim().toLowerCase() != 'purchasedate') {
+        format=false;
+        errmsg+='column 2 name:"'+temp[1]+'" does not match "PurchaseDate"\n';
+      }
+      if(temp[2].replace(/"/g, '').trim().toLowerCase() != 'multiple') {
+        format=false;
+        errmsg+='column 3 name:"'+temp[2]+'" does not match "Multiple"\n';
+      }
+      if(temp[3].replace(/"/g, '').trim().toLowerCase() != 'assetid') {
+        format=false;
+        errmsg+='column 4 name:"'+temp[3]+'" does not match "AssetID"\n';
+      }
+      if (!format) {
         context.response.writeLine('Incorrect CSV format. Please see requirements and check the file you are uploading.');
+        context.response.writeLine('Error(s):\n'+errmsg);
         return;
       }
       f.folder=24169;

@@ -137,6 +137,7 @@ function Deal_Backlog_CS_FC(type,name,linenum)
    }
 }
 
+
 function onDownload(){
 	var lineCount = nlapiGetLineItemCount("custpage_deals");
     if (lineCount > 0) {
@@ -168,10 +169,6 @@ function onDownload(){
        	content.push(row);
           }
 
-	    	/*row = row.map(function(field) {
-	    			return "'" + field + "'";
-    			});*/
-    		//xmlString = xmlString + row.join() + '\n';
 	    }
     }
  var  finalVal='';
@@ -198,3 +195,60 @@ function onDownload(){
     element.click();
     document.body.removeChild(element);
 }
+
+/***************************************************************************/
+  function getDateTime(date) {
+    console.log(date);
+    var d;
+    if(!!date)
+      d=new Date(date);
+    else
+      d=new Date();
+    var datestring=d.getFullYear()+(d.getMonth()+1).toString().padStart(2,'0')+(d.getDate()).toString().padStart(2,'0')+'-'+(d.getHours()).toString().padStart(2,'0')+(d.getMinutes()).toString().padStart(2,'0')+(d.getSeconds()).toString().padStart(2,'0');
+    return datestring;
+  }
+
+  function getcsvdata(sublistId) {
+    tables=document.getElementsByTagName('table');
+    var mytable=null;
+    for(var i=0; i<tables.length; i++) {
+      var table=tables[i];
+      if(table.id.match(sublistId)) {
+        mytable=table;
+      }
+    }    var b=mytable.getElementsByTagName('tbody');
+    var rows=b[0].childNodes;
+    var data=[];
+    data[0]=rows[0].innerText.split(/\n\t\n/);
+    for(var i=2; i<rows.length; i+=2) {
+      data.push(rows[i].innerText.split(/\t/));
+    }
+    return data;
+  }
+
+  function csvexport() {
+//    alert(`sublistId:${sublistId}, filename:${filename}, mapfunction:${mapfunction}`);
+    var mapfunction=null;
+    var filename='DiligenceListCsv ';
+    var data=getcsvdata('custpage_deals');
+    var xmlstring='';
+    for(var i=0; i<data.length; i++) {
+      data[i]=data[i].map(function(field) {return field.trim()});
+      data[i]=data[i].map(function(field) {return field.replace(/"/g,'""')});
+      if(mapfunction!=null && mapfunction!=undefined) {
+        data[i]=data[i].map(mapfunction);
+      }
+      xmlstring += '"' + data[i].join('","') + '"\r\n';
+    }
+//    return xmlstring.trim();
+    var d = new Date();
+    var datestring = getDateTime();
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(xmlstring));
+    element.setAttribute('download', filename + " - " + datestring + ".csv");
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    return true;
+  }

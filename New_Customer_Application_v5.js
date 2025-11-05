@@ -609,6 +609,25 @@ function New_Customer_Application(request, response) {
           fld.addSelectOption(currentdiligencerep, currentdiligencerepname + ' (legacy)', true);
         }
         fld.setDefaultValue(currentdiligencerep);
+
+        
+        fld = form.addField("custpage_pm_assignee", "select", "Portfolio Management Assignee", null, "estate");
+        if (estate != null) {
+          var currentpmrep = estate.getFieldValue("custentity_pm_assignee");
+          var currentpmrepname = estate.getFieldText("custentity_pm_assignee");
+          nlapiLogExecution('debug', currentpmrep + ' ' + currentpmrepname);
+        }
+        fld.addSelectOption(null, '', true);
+        var pmreps = getRepList('pm');
+        var selectoptions = [];
+        pmreps.forEach(function (line) {
+          selectoptions.push(line.value);
+          fld.addSelectOption(line.value, line.text);
+        });
+        if (currentpmrep != null && currentpmrep != '' && selectoptions.indexOf(currentpmrep) == -1) {
+          fld.addSelectOption(currentpmrep, currentpmrepname + ' (legacy)', true);
+        }
+        fld.setDefaultValue(currentpmrep);
 /////////////// end new for reduced select options ///////////////
 
 
@@ -2494,6 +2513,9 @@ function getRepList(type) {
   if (type == 'diligence') {
     fieldid = 'custentity_isdiligencerep';
   }
+  if(type == 'pm') {
+    fieldid = 'custentity_isportfoliomgmt';
+  }
   filters.push(new nlobjSearchFilter(fieldid, null, 'is', 'T', null));
   filters.push(new nlobjSearchFilter('isInactive', null, 'is', 'F', null));
   var columns = [];
@@ -2641,42 +2663,39 @@ function stateToAbbrev(statename) {
 }
 
 function getcasefilelink(casenum, countyval) {
-  var retval=null;
-  var countyname=nlapiLookupField('customrecord173',countyval, 'name');
-  var stcty=countyname.split("_");
-  var filenamecomponents=[];
-  filenamecomponents.push(stateToAbbrev(stcty[0]));
-  filenamecomponents.push(stcty[1]);
-  filenamecomponents.push(casenum);
-  var casefilename=filenamecomponents.join("_");
-  var rs = nlapiSearchRecord("file",null,
-    [
-       ["formulatext: regexp_replace({name},'\\..*$','')","is",casefilename]
-    ], 
-    [
-       new nlobjSearchColumn("name"), 
-       new nlobjSearchColumn("folder"), 
-       new nlobjSearchColumn("documentsize"), 
-       new nlobjSearchColumn("url"), 
-       new nlobjSearchColumn("created"), 
-       new nlobjSearchColumn("modified"), 
-       new nlobjSearchColumn("filetype")
-    ]
-    );
-  if(rs==null)
-    rs=[];
-  switch(rs.length) {
+  var retval = null;
+  nlapiLogExecution('DEBUG', casenum + ' ' + countyval);
+  var rs = nlapiSearchRecord("customrecord_petition_file", null,
+      [
+        ["custrecord_petitionfile_statecounty", "anyof", countyval],
+        "AND",
+        ["custrecord_petitionfile_casenum", "is", casenum]
+      ],
+      [
+        new nlobjSearchColumn("custrecord_petitionfile_filename"),
+        new nlobjSearchColumn("custrecord_petitionfile_url")
+      ]
+  );
+  if (rs == null)
+    rs = [];
+  switch (rs.length) {
     case 0:
-      retval='No file uploaded yet';
+      retval = 'No file uploaded yet';
       break;
     case 1:
-      var filename=rs[0].getValue("name");
-      var fileurl=rs[0].getValue("url");
-      var linktext='<a target="_blank" href="'+fileurl+'">'+filename+'</a>';
-      retval=linktext;
+      var filename = rs[0].getValue("custrecord_petitionfile_filename");
+      var fileurl = rs[0].getValue("custrecord_petitionfile_url");
+      var linktext = '<a target="_blank" href="' + fileurl + '">' + filename + '</a>';
+      retval = linktext;
       break;
     default:
-      retval="More than one match - need further investigation";
+      retval='';
+      for(var i=0; i<rs.length; i++) {
+        var filename = rs[i].getValue("custrecord_petitionfile_filename");
+        var fileurl = rs[i].getValue("custrecord_petitionfile_url");
+        var linktext = '<a target="_blank" href="' + fileurl + '">' + filename + '</a>';
+        retval += linktext;
+      }
   }
   return retval;
 }

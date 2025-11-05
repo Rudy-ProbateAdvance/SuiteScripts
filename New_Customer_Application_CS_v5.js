@@ -98,6 +98,26 @@ function New_Cust_App_CS_PI() {
 }
 
 function New_Cust_App_CS_FC(type, name, linenum) {
+  try {
+  if(window.hasOwnProperty('inactivitytimerid')) {
+    console.log('hasBeenActive', navigator.userActivation.hasBeenActive, 'ischanged', window.ischanged, 'timer id', window.inactivitytimerid);
+    var result=window.clearTimeout(window.inactivitytimerid);
+    console.log('cleared timeout', result);
+    delete window.inactivitytimerid;
+  }
+
+  console.log('hasBeenActive', navigator.userActivation.hasBeenActive, 'ischanged', window.ischanged, 'timer id', window.inactivitytimerid);
+  if(navigator.userActivation.hasBeenActive) {
+    console.log('setting new timer');
+    window.inactivitytimerid = window.setTimeout(function () {
+      savebuttonclick();
+    }, 900000);
+  }
+  window.ischanged=false;
+  } catch(e) {
+    console.log(e.name, e.message);
+  }
+    
   if(window.suppressfieldchangedfunction==true) {
     return;
   }
@@ -113,23 +133,6 @@ function New_Cust_App_CS_FC(type, name, linenum) {
       elem.style.backgroundColor=null;
     }
     return;
-  }
-
-  if(nlapiGetUser()!=2299863) {
-    if(navigator.userActivation.hasBeenActive) {
-      if (window.inactivitytimerid) {
-        window.clearTimeout(window.inactivitytimerid);
-        window.inactivitytimerid = null;
-        delete window.inactivitytimerid;
-      }
-      window.inactivitytimerid = window.setTimeout(function () {
-  //      alert('inactivity timer: ' + window.inactivitytimerid);
-  //      saveall();
-        savebuttonclick();
-      }, 300000);
-    } else {
-      window.ischanged=false;
-    }
   }
 
   try {
@@ -334,6 +337,14 @@ function New_Cust_App_CS_FC(type, name, linenum) {
       calcEstateTotals();
 
 
+    } else if (name == 'custpage_pm_assignee') {
+      debugger;
+      var estateId = nlapiGetFieldValue("custpage_estate");
+      var val=nlapiGetFieldValue('custpage_pm_assignee');
+      if(val=='undefined')
+        val=null;
+      nlapiSubmitField('customer', estateId, 'custentity_pm_assignee', val);
+      return true;
     } else if (name == "custpage_first_name" || name == "custpage_diligence_assignee" || name == "custpage_middle_initial" || name == "custpage_last_name" || name == "custpage_address" || name == "custpage_city" || name == "custpage_state" || name == "custpage_zip" || name == "custpage_phone" || name == "custpage_email" || name == "custpage_how_did_they_find_us" || name == "custpage_alt_phone") {
       var customerId = nlapiGetFieldValue("custpage_customer_id");
 
@@ -2728,8 +2739,9 @@ function Customerreminder() {
 }
 
 function Conversations() {
+  var userid=nlapiGetUser();
   var url = nlapiResolveURL("SUITELET", "customscript_mmsdf_sl_conversations_ui", "customdeploy_mmsdf_sl_conversations_ui");
-  url += "&recordId=" + nlapiGetFieldValue("custpage_customer_id") + "&recordType=customer&smsSender=1090342";
+  url += "&recordId=" + nlapiGetFieldValue("custpage_customer_id") + "&recordType=customer&smsSender=1162&view=conversations"; //1090342";
   window.open(url, 'docUploadWin', 'dependent=yes,width=1500%,height=1500%');
   //'dependent=yes,width=500,height=300'
 }
@@ -3870,42 +3882,39 @@ function stateToAbbrev(statename) {
 }
 
 function getcasefilelink(casenum, countyval) {
-  var retval=null;
-  var countyname=nlapiLookupField('customrecord173',countyval, 'name');
-  var stcty=countyname.split("_");
-  var filenamecomponents=[];
-  filenamecomponents.push(stateToAbbrev(stcty[0]));
-  filenamecomponents.push(stcty[1]);
-  filenamecomponents.push(casenum);
-  var casefilename=filenamecomponents.join("_");
-  var rs = nlapiSearchRecord("file",null,
-    [
-       ["formulatext: regexp_replace({name},'\\..*$','')","is",casefilename]
-    ], 
-    [
-       new nlobjSearchColumn("name"), 
-       new nlobjSearchColumn("folder"), 
-       new nlobjSearchColumn("documentsize"), 
-       new nlobjSearchColumn("url"), 
-       new nlobjSearchColumn("created"), 
-       new nlobjSearchColumn("modified"), 
-       new nlobjSearchColumn("filetype")
-    ]
-    );
-  if(rs==null)
-    rs=[];
-  switch(rs.length) {
+  var retval = null;
+  nlapiLogExecution('DEBUG', casenum + ' ' + countyval);
+  var rs = nlapiSearchRecord("customrecord_petition_file", null,
+      [
+        ["custrecord_petitionfile_statecounty", "anyof", countyval],
+        "AND",
+        ["custrecord_petitionfile_casenum", "is", casenum]
+      ],
+      [
+        new nlobjSearchColumn("custrecord_petitionfile_filename"),
+        new nlobjSearchColumn("custrecord_petitionfile_url")
+      ]
+  );
+  if (rs == null)
+    rs = [];
+  switch (rs.length) {
     case 0:
-      retval='No file uploaded yet';
+      retval = 'No file uploaded yet';
       break;
     case 1:
-      var filename=rs[0].getValue("name");
-      var fileurl=rs[0].getValue("url");
-      var linktext='<a target="_blank" href="'+fileurl+'">'+filename+'</a>';
-      retval=linktext;
+      var filename = rs[0].getValue("custrecord_petitionfile_filename");
+      var fileurl = rs[0].getValue("custrecord_petitionfile_url");
+      var linktext = '<a target="_blank" href="' + fileurl + '">' + filename + '</a>';
+      retval = linktext;
       break;
     default:
-      retval="More than one match - need further investigation";
+      retval='';
+      for(var i=0; i<rs.length; i++) {
+        var filename = rs[i].getValue("custrecord_petitionfile_filename");
+        var fileurl = rs[i].getValue("custrecord_petitionfile_url");
+        var linktext = '<a target="_blank" href="' + fileurl + '">' + filename + '</a>';
+        retval += linktext;
+      }
   }
   return retval;
 }
@@ -3916,9 +3925,9 @@ function searchbuttonclick() {
   var estate_casenum=nlapiGetFieldValue('custpage_case_no');
   var customer_unsubscribe=nlapiGetFieldValue('custpage_unsubscribe');
   var params='&state='+estate_state+'&county='+estate_county+'&casenum='+estate_casenum+'&unsubscribe='+customer_unsubscribe;
-  nlOpenWindow('/app/site/hosting/scriptlet.nl?script=2622&deploy=1'+params, '_blank','height=550,width=1000,toolbar=yes');
+  nlOpenWindow('/app/site/hosting/scriptlet.nl?script=2623&deploy=1'+params, '_blank','height=550,width=1000,toolbar=yes');
 //  nlOpenWindow('/app/common/entity/contact.nl?id='+getSelectValue(getFormElementViaFormName('main_form', 'custpage_attorney_id'))+'', '_blank','height=450,width=450');
-//  var request=nlapiRequestURL("/app/site/hosting/restlet.nl?script=2621&deploy=1", null, null, null, "GET");
+//  var request=nlapiRequestURL("/app/site/hosting/restlet.nl?script=2623&deploy=1", null, null, null, "GET");
 //  var data=JSON.parse(request.body);
 //  console.log(request.body);
   return true;
