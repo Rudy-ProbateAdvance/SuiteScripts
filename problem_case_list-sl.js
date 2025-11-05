@@ -38,6 +38,7 @@ define(['N/record', 'N/search', 'N/query', 'N/ui/serverWidget', 'SuiteScripts/Li
       "estid":{name:'Estate ID', type:'text', displayType:'inline'},
       "problemcase":{name:'Problem Case', type:'checkbox', displayType:'entry'},
       "estname":{name:'Name', type:'text', displayType:'inline'},
+      "pmassignee":{name:'Portfolio Mgmt Assignee', type:'text', displayType:'inline'},
       "receivables":{name:'Receivables', type:'text', displayType:'inline'},
       "totaldefault":{name:'Total Expected Default', type:'text', displayType:'inline'},
       "flagnotemsg":{name:'Flagged Note Message', type:'textarea', displayType:'entry'},
@@ -62,6 +63,7 @@ define(['N/record', 'N/search', 'N/query', 'N/ui/serverWidget', 'SuiteScripts/Li
         , null as priority
         , e.entityid as estid
         , e.altname as estname
+        , BUILTIN.DF(e.custentity_pm_assignee) as pmassignee
         , '<a target="_blank" href="/app/common/entity/custjob.nl?id='||e.id||'"><p id="'||e.id||'">view</p></a>' as estlink
         , sum(tl.rate) as invoices
         , null as defaultonexpected
@@ -94,6 +96,7 @@ define(['N/record', 'N/search', 'N/query', 'N/ui/serverWidget', 'SuiteScripts/Li
         group by e.id
         , e.entityid
         , e.altname
+        , BUILTIN.DF(e.custentity_pm_assignee)
         , e.custentity_pcl_priority
         , f.id
         , f.startdate
@@ -329,6 +332,8 @@ define(['N/record', 'N/search', 'N/query', 'N/ui/serverWidget', 'SuiteScripts/Li
     fld.defaultValue='T';
     var fld=estsl.addField({id:'estname', label:'Name', type:'text'});
     fld.updateDisplayType({displayType:'inline'});
+    var fld=estsl.addField({id:'estpmassignee', label:'Portfolio Mgmt Assignee', type:'text'});
+    fld.updateDisplayType({displayType:'inline'});
     var fld=estsl.addField({id:'receivables', label:'Receivables', type:'integer'});
     fld.updateDisplayType({displayType:'inline'});
     var fld=estsl.addField({id:'defaultonexpected', label:'Default On Expected', type:'integer'});
@@ -396,6 +401,7 @@ define(['N/record', 'N/search', 'N/query', 'N/ui/serverWidget', 'SuiteScripts/Li
       estsl.setSublistValue({id:'viewestate', line:i, value:estate.estlink});
       estsl.setSublistValue({id:'estid', line:i, value:estid});
       estsl.setSublistValue({id:'estname', line:i, value:estate.estname});
+      estsl.setSublistValue({id:'estpmassignee', line:i, value:estate.pmassignee});
       estsl.setSublistValue({id:'receivables', line:i, value:estate.invoices});
       estsl.setSublistValue({id:'defaultonexpected', line:i, value:estate.defaultonexpected});
       estsl.setSublistValue({id:'defaultonadvance', line:i, value:estate.defaultonadv});
